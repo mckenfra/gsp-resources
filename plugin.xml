@@ -54,7 +54,7 @@ example above add ?color=FFF to the url.
   <resources>
     <resource>UrlMappings</resource>
     <resource>com.nerderg.gsparse.ScriptController</resource>
-    <resource>com.nerderg.gsparse.GsParseService</resource>
+    <resource>com.nerderg.gsparse.GspParsingService</resource>
   </resources>
   <dependencies />
   <behavior />

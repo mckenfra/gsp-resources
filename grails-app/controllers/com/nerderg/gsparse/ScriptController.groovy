@@ -17,10 +17,9 @@ package com.nerderg.gsparse
 
 class ScriptController {
 
-    def gsParseService
+    def gspParsingService
 
     def parse = {
-
         def gmfe = grailsApplication.config.grails.mime.file.extensions
         def mimeTypes = grailsApplication.config.grails.mime.types
         def path = gmfe ? params.path + ".$request.format" : params.path
@@ -35,7 +34,7 @@ class ScriptController {
         }
 
         if (file.exists()) {
-            def buf = gsParseService.parseFile(file, params)
+            def buf = gspParsingService.parseFile(file, params)
             render(text: buf.toString(), contentType: type, encoding: "UTF-8")
         } else {
             response.sendError(404)
