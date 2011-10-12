@@ -1,9 +1,13 @@
 import org.codehaus.groovy.grails.commons.GrailsResourceUtils
 import org.grails.plugin.resource.mapper.MapperPhase
+import groovy.text.Template
+import org.codehaus.groovy.grails.web.pages.GroovyPagesTemplateEngine
 
-class SassResourceMapper {
+class GspResourceMapper {
     def phase = MapperPhase.GENERATION
     def priority = -1
+
+    GroovyPagesTemplateEngine groovyPagesTemplateEngine
 
     static defaultExcludes = ['**/*.js', '**/*.png', '**/*.gif', '**/*.jpg', '**/*.jpeg', '**/*.gz', '**/*.zip']
     static defaultIncludes = ['**/*.gsp']
@@ -11,26 +15,17 @@ class SassResourceMapper {
     private static String GSP_FILE_EXTENSIONS = ['.gsp']
 
     def map(resource, config) {
-        File originalFile = resource.processedFile
+        File originalFile = getOriginalFileSystemFile(resource.sourceUrl)
 
         if (resource.sourceUrl && isFileGspFile(originalFile)) {
             File input = getOriginalFileSystemFile(resource.sourceUrl);
             File output = new File(generateCompiledFilenameFromOriginal(originalFile.absolutePath))
-            output << "Hello, World"
+            StringBuffer buffer = compileGsp(input)
+            output.write(buffer.toString(), "UTF-8")
+
             resource.processedFile = output
-//            resource.contentType = 'text/css'
-            //            resource.sourceUrlExtension = 'css'
-            //            resource.tagAttributes.rel = 'stylesheet'
-
-
             resource.actualUrl = generateCompiledFilenameFromOriginal(resource.originalUrl)
         }
-    }
-
-    private File getConfigFile() {
-        def configFile = new File("grails-app/conf/GrassConfig.groovy")
-        def defaultConfigFile = new File("grails-app/conf/DefaultGrassConfig.groovy")
-        return configFile.exists() ? configFile : defaultConfigFile
     }
 
     private boolean isFileGspFile(File file) {
@@ -43,5 +38,17 @@ class SassResourceMapper {
 
     private File getOriginalFileSystemFile(String sourcePath) {
         new File(GrailsResourceUtils.WEB_APP_DIR + sourcePath);
+    }
+
+    StringBuffer compileGsp(File input) {
+        def sw = new StringWriter()
+//        try {
+//            Template t = groovyPagesTemplateEngine.createTemplate(input)
+//            Writable w = t.make([:])
+//            w.writeTo(sw)
+            return sw.getBuffer()
+//        } finally {
+//            sw.close()
+//        }
     }
 }
