@@ -1,18 +1,15 @@
 class GSParseGrailsPlugin {
     // the plugin version
-    def version = "1.3"
+    def version = "0.1"
     // the version or versions of Grails the plugin is designed for
-    def grailsVersion = "1.3.2 > *"
+    def grailsVersion = "1.3.7 > *"
     // the other plugins this plugin depends on
     def dependsOn = [:]
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
-        "grails-app/views/error.gsp",
-        "grails-app/views/script/test.gsp",
-        "web-app/js/application.js",
-        "web-app/js/jQuery/test.js",
-        "web-app/css/main.css",
-        "web-app/images/happy-cat.jpg"
+            'grails-app/views/*.gsp',
+            'web-app/**/*',
+            '**/MyAppResources.groovy',
     ]
 
     def author = "Peter McNeil"
