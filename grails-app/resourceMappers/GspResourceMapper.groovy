@@ -1,15 +1,19 @@
+import grails.util.GrailsWebUtil
 import groovy.text.SimpleTemplateEngine
+import org.codehaus.groovy.grails.commons.ApplicationHolder
 import org.codehaus.groovy.grails.commons.GrailsResourceUtils
+import org.codehaus.groovy.grails.web.pages.GroovyPagesTemplateEngine
 import org.grails.plugin.resource.mapper.MapperPhase
+import org.springframework.web.context.WebApplicationContext
 
 class GspResourceMapper {
     def phase = MapperPhase.GENERATION
     def priority = -1
 
-    def grailsApplication
-
     static defaultExcludes = ['**/*.js', '**/*.png', '**/*.gif', '**/*.jpg', '**/*.jpeg', '**/*.gz', '**/*.zip']
     static defaultIncludes = ['**/*.gsp']
+
+    GroovyPagesTemplateEngine groovyPagesTemplateEngine
 
     private static String GSP_FILE_EXTENSIONS = ['.gsp']
 
@@ -19,7 +23,7 @@ class GspResourceMapper {
         if (resource.sourceUrl && isFileGspFile(originalFile)) {
             File input = getOriginalFileSystemFile(resource.sourceUrl);
             File output = new File(generateCompiledFilenameFromOriginal(originalFile.absolutePath))
-            String compiledText = compileGsp(input)
+            String compiledText = compileGspFull(input)
             output.write(compiledText, "UTF-8")
 
             resource.processedFile = output
@@ -40,7 +44,13 @@ class GspResourceMapper {
     }
 
     String compileGsp(File input) {
-        grailsApplication.mainContext.classLoader.getResource(input.absolutePath)
         return new SimpleTemplateEngine().createTemplate(input).make().toString()
+    }
+
+    String compileGspFull(File input) {
+        GrailsWebUtil.bindMockWebRequest((WebApplicationContext) ApplicationHolder.application.mainContext)
+        StringWriter sw = new StringWriter()
+        groovyPagesTemplateEngine.createTemplate(input).make().writeTo(sw)
+        return sw.toString()
     }
 }
