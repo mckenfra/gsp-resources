@@ -23,7 +23,7 @@ class GspResourceMapper {
         if (resource.sourceUrl && isFileGspFile(originalFile)) {
             File input = getOriginalFileSystemFile(resource.sourceUrl);
             File output = new File(generateCompiledFilenameFromOriginal(originalFile.absolutePath))
-            String compiledText = compileGspFull(input)
+            String compiledText = compileGsp(input)
             output.write(compiledText, "UTF-8")
 
             resource.processedFile = output
@@ -44,10 +44,6 @@ class GspResourceMapper {
     }
 
     String compileGsp(File input) {
-        return new SimpleTemplateEngine().createTemplate(input).make().toString()
-    }
-
-    String compileGspFull(File input) {
         GrailsWebUtil.bindMockWebRequest((WebApplicationContext) ApplicationHolder.application.mainContext)
         StringWriter sw = new StringWriter()
         groovyPagesTemplateEngine.createTemplate(input).make().writeTo(sw)
