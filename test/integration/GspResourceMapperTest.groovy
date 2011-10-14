@@ -19,6 +19,10 @@ class GspResourceMapperTest extends GroovyTestCase {
                 "h1{border: solid 3px black}h2{border: solid 3px gray}h3{border: solid 3px black}h4{border: solid 3px gray}")
     }
 
+    public void test_compile_static_reference() {
+        assertCompilationOutput(new File('web-app/css/static-reference.js.gsp'), "var x=1;")
+    }
+
     private void assertCompilationOutput(File file, String expectedOutput) {
         String output = gspResourceMapper.compileGsp(file)
         assertEquals("Expected:\n$expectedOutput\n\nActual:\n$output", expectedOutput.trim(), output.trim())
