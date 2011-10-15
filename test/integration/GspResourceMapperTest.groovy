@@ -9,6 +9,16 @@ class GspResourceMapperTest extends GroovyTestCase {
         gspResourceMapper.groovyPagesTemplateEngine = groovyPagesTemplateEngine
     }
 
+    public void test_compile_empty_template() {
+        assertCompilationOutput(new File('web-app/css/empty-template.css.gsp'), "")
+    }
+
+    public void test_compile_invalid_template() {
+        shouldFail {
+            gspResourceMapper.compileGsp(new File('web-app/js/invalid-template.js.gsp'))
+        }
+    }
+
     public void test_compile_simple_template() {
         assertCompilationOutput(new File('web-app/css/simple-template.css.gsp'),
                 "h1{color: red}h2{color: pink}h3{color: blue}h4{color: green}")
@@ -20,7 +30,7 @@ class GspResourceMapperTest extends GroovyTestCase {
     }
 
     public void test_compile_static_reference() {
-        assertCompilationOutput(new File('web-app/css/static-reference.js.gsp'), "var x=1;")
+        assertCompilationOutput(new File('web-app/js/static-reference.js.gsp'), "var x=1;")
     }
 
     private void assertCompilationOutput(File file, String expectedOutput) {

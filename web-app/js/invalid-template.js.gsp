@@ -1,0 +1,1 @@
+var x=[];<g:eac>x.push($it)</g:each>
