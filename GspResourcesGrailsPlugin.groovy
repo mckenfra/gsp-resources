@@ -11,7 +11,7 @@ class GspResourcesGrailsPlugin {
 
     def author = "Stefan Kendall"
     def authorEmail = "stefankendall@gmail.com"
-    def title = "Pre-compile JS, CSS, and other static files as GSPs"
+    def title = "GSP Resources"
     def description = 'Use the resources plugin to include static files like main.css.gsp, so dynamically built CSS and JS can be served as proper files instead of inlined in a non-cacheable GSP file. Note that changes to the GSP will cause a recompile, but changes to GSP data will not.'
 
     def documentation = "http://grails.org/plugin/gsp-resources"
