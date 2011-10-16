@@ -33,6 +33,10 @@ class GspResourceMapperTest extends GroovyTestCase {
         assertCompilationOutput(new File('web-app/js/static-reference.js.gsp'), "var x=1;")
     }
 
+    public void test_compile_gsp_inner_function() {
+        assertCompilationOutput(new File('web-app/js/fibonacci.js.gsp'), "var fibonacci = [0,1,1,2,3,5,8,13,21,34,55];")
+    }
+
     private void assertCompilationOutput(File file, String expectedOutput) {
         String output = gspResourceMapper.compileGsp(file)
         assertEquals("Expected:\n$expectedOutput\n\nActual:\n$output", expectedOutput.trim(), output.trim())

@@ -10,5 +10,8 @@
         <h2>H2</h2>
         <h3>H3</h3>
         <h4>H4</h4>
+        <script type="text/javascript">
+            document.write(fibonacci);
+        </script>
     </body>
 </html>
