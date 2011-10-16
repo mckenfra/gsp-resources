@@ -1,12 +1,11 @@
 import grails.util.GrailsWebUtil
-import groovy.text.SimpleTemplateEngine
 import org.codehaus.groovy.grails.commons.ApplicationHolder
-import org.codehaus.groovy.grails.commons.GrailsResourceUtils
 import org.codehaus.groovy.grails.web.pages.GroovyPagesTemplateEngine
 import org.grails.plugin.resource.mapper.MapperPhase
 import org.springframework.web.context.WebApplicationContext
 
 class GspResourceMapper {
+    def grailsApplication
     def phase = MapperPhase.GENERATION
     def priority = -1
 
@@ -40,7 +39,7 @@ class GspResourceMapper {
     }
 
     private File getOriginalFileSystemFile(String sourcePath) {
-        new File(GrailsResourceUtils.WEB_APP_DIR + sourcePath);
+        grailsApplication.parentContext.getResource(sourcePath).file
     }
 
     String compileGsp(File input) {

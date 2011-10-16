@@ -24,9 +24,9 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://repository.jboss.com/maven2/"
     }
     dependencies {
+        runtime 'org.springframework:spring-test:3.0.6.RELEASE'
     }
     plugins {
-        runtime("org.grails.plugins:resources:1.0.2") {
-        }
+        runtime "org.grails.plugins:resources:1.0.2"
     }
 }
