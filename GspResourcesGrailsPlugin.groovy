@@ -1,10 +1,11 @@
 class GspResourcesGrailsPlugin {
-    def version = "0.1"
+    def version = "0.2"
     def grailsVersion = "1.3.7 > *"
-    def dependsOn = [:]
+    def dependsOn = [resources: '1.0.2']
     def pluginExcludes = [
             'src/groovy/**/*',
             'grails-app/views/*.gsp',
+            'grails-app/controllers/**/*',
             'web-app/**/*',
             '**/MyAppResources.groovy',
     ]

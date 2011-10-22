@@ -1,8 +1,8 @@
 import grails.util.GrailsWebUtil
 import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.codehaus.groovy.grails.plugins.web.taglib.ApplicationTagLib
 import org.codehaus.groovy.grails.web.pages.GroovyPagesTemplateEngine
 import org.grails.plugin.resource.mapper.MapperPhase
-import org.codehaus.groovy.grails.plugins.web.taglib.ApplicationTagLib
 import org.springframework.mock.web.MockHttpServletRequest
 import javax.servlet.http.HttpServletRequest
 
