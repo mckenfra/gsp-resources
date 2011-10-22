@@ -1,17 +1,20 @@
 import grails.util.GrailsWebUtil
-import org.codehaus.groovy.grails.commons.ApplicationHolder
+import org.codehaus.groovy.grails.commons.GrailsApplication
 import org.codehaus.groovy.grails.web.pages.GroovyPagesTemplateEngine
 import org.grails.plugin.resource.mapper.MapperPhase
-import org.springframework.web.context.WebApplicationContext
+import org.codehaus.groovy.grails.plugins.web.taglib.ApplicationTagLib
+import org.springframework.mock.web.MockHttpServletRequest
+import javax.servlet.http.HttpServletRequest
 
 class GspResourceMapper {
-    def grailsApplication
     def phase = MapperPhase.GENERATION
+
     def priority = -1
 
     static defaultExcludes = ['**/*.js', '**/*.png', '**/*.gif', '**/*.jpg', '**/*.jpeg', '**/*.gz', '**/*.zip']
     static defaultIncludes = ['**/*.gsp']
 
+    GrailsApplication grailsApplication
     GroovyPagesTemplateEngine groovyPagesTemplateEngine
 
     private static String GSP_FILE_EXTENSIONS = ['.gsp']
@@ -43,9 +46,42 @@ class GspResourceMapper {
     }
 
     String compileGsp(File input) {
-        GrailsWebUtil.bindMockWebRequest((WebApplicationContext) ApplicationHolder.application.mainContext)
-        StringWriter sw = new StringWriter()
-        groovyPagesTemplateEngine.createTemplate(input).make().writeTo(sw)
-        return sw.toString()
+        StringWriter gspWriter = new StringWriter()
+        GrailsWebUtil.bindMockWebRequest(grailsApplication.mainContext)
+        prepareAndWriteGsp(input, gspWriter)
+
+        return gspWriter.toString()
+    }
+
+    protected def prepareAndWriteGsp(File input, StringWriter gspWriter) {
+        prepareApplicationTagLibMetaclass(gspWriter)
+        try {
+            groovyPagesTemplateEngine.createTemplate(input).make().writeTo(gspWriter)
+        }
+        catch (Exception e) {
+            throw e
+        }
+        finally {
+            restoreApplicationTagLibMetaclass()
+        }
+    }
+
+    def applicationTagLibGetOut
+    def applicationTagLibGrailsApplication
+    def applicationTagLibRequest
+
+    protected void prepareApplicationTagLibMetaclass(StringWriter gspWriter) {
+        applicationTagLibGetOut = ApplicationTagLib.metaClass.getOut
+        applicationTagLibGrailsApplication = ApplicationTagLib.metaClass.grailsApplication
+        applicationTagLibRequest = ApplicationTagLib.metaClass.request
+        ApplicationTagLib.metaClass.getOut = {-> gspWriter}
+        ApplicationTagLib.metaClass.grailsApplication = grailsApplication
+        ApplicationTagLib.metaClass.request = new MockHttpServletRequest()
+    }
+
+    protected def restoreApplicationTagLibMetaclass() {
+        ApplicationTagLib.metaClass.getOut = applicationTagLibGetOut
+        ApplicationTagLib.metaClass.grailsApplication = applicationTagLibGrailsApplication
+        ApplicationTagLib.metaClass.request = applicationTagLibRequest
     }
 }

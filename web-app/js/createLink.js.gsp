@@ -1,0 +1,1 @@
+var link='${createLink(controller: 'test')}';

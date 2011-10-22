@@ -1,12 +1,16 @@
 import org.codehaus.groovy.grails.web.pages.GroovyPagesTemplateEngine
+import org.codehaus.groovy.grails.commons.GrailsApplication
+import org.codehaus.groovy.grails.plugins.web.taglib.ApplicationTagLib
 
 class GspResourceMapperTest extends GroovyTestCase {
     GspResourceMapper gspResourceMapper
     GroovyPagesTemplateEngine groovyPagesTemplateEngine
+    GrailsApplication grailsApplication
 
     public void setUp() {
         gspResourceMapper = new GspResourceMapper()
         gspResourceMapper.groovyPagesTemplateEngine = groovyPagesTemplateEngine
+        gspResourceMapper.grailsApplication = grailsApplication
     }
 
     public void test_compile_empty_template() {
@@ -35,6 +39,17 @@ class GspResourceMapperTest extends GroovyTestCase {
 
     public void test_compile_gsp_inner_function() {
         assertCompilationOutput(new File('web-app/js/fibonacci.js.gsp'), "var fibonacci = [0,1,1,2,3,5,8,13,21,34,55];")
+    }
+
+    public void test_compile_gsp_createLink() {
+        assertCompilationOutput(new File('web-app/js/createLink.js.gsp'), "var link='/test/index';")
+    }
+
+    public void test_compile_gsp_createLink_does_not_change_taglib_metaclass() {
+        MetaClass metaClass = ApplicationTagLib.metaClass
+        gspResourceMapper.compileGsp(new File('web-app/js/createLink.js.gsp'));
+        assertEquals("ApplicationTagLib metaclass has been changed", null, metaClass.hasProperty('request'))
+        assertEquals("ApplicationTagLib metaclass has been changed", null, metaClass.hasProperty('grailsApplication'))
     }
 
     private void assertCompilationOutput(File file, String expectedOutput) {
