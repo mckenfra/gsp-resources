@@ -12,8 +12,9 @@ class GspResourcesGrailsPlugin {
     ]
     def pluginExcludes = [
             'src/groovy/**/test/*',
-            'grails-app/views/*.gsp',
+            'grails-app/views/**/*',
             'grails-app/controllers/**/*',
+            'grails-app/i18n/**/*',
             'web-app/**/*',
             '**/MyAppResources.groovy',
     ]
