@@ -27,9 +27,9 @@ grails.project.dependency.resolution = {
         runtime 'org.springframework:spring-test:3.0.6.RELEASE'
     }
     plugins {
-        build(":release:1.0.0.RC3") {
+        build(":release:latest.integration") {
             export = false
         }
-        runtime "org.grails.plugins:resources:1.1.1"
+        runtime "org.grails.plugins:resources:latest.integration"
     }
 }
