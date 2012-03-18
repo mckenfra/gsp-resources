@@ -6,20 +6,8 @@ var fibonacci = [&lt;%=(0..10).collect{ fib.call(it) }.join(',')%&gt;];</code></
 which is then cacheable and serveable as a javascript file as
 <pre><code>var fibonacci = [0,1,1,2,3,5,8,13,21,34,55];</code></pre>
 
-##Installation##
-<pre><code>grails install-plugin gsp-resources</code></pre>
-
-##Usage##
-<pre><code>'style' {
-    resource url:'css/test.css.gsp',attrs:[rel: 'stylesheet/css', type:'css']
-}
-</code></pre>
-
-##Limitations##
-Since this plugin is meant to serve *static* resources, there is no inherent data-watching within GSPs. Changes to a GSP file itself will trigger recompilation, but changes to the data referenced within a GSP will not.
-
 ##User Guide##
 Full documentation <a href="http://mckenfra.github.com/gsp-resources/guide/single.html">here</a>
 
 ##Special Thanks##
-Peter McNeil for his work on <a href="http://nerderg.com/GSParse">GSParse</a>, which was the inspiration for this plugin.
+Stefan Kendall for creating the original <a href="https://github.com/stefankendall/gsp-resources">gsp-resources plugin</a>
