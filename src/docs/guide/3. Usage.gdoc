@@ -1,0 +1,10 @@
+In your project resources file, define GSPs as resources like any other resource type:
+
+{code}
+'style' {
+    resource url:'css/test.css.gsp', attrs:[rel: 'stylesheet/css', type:'css']
+}
+{code}
+
+Note the additional @attrs@ parameter, which is used to tell
+the resources plugin the type of the resource being generated. 

@@ -1,0 +1,14 @@
+This plugin allows you to reference GSP-generated files as cacheable static resources.
+Consider the following:
+
+h3. fibonacci.js.gsp
+{code}
+<% fib = {n ->; return n <= 1 ? n : fib(n-1) + fib(n-2)} %>
+var fibonacci = [<%= (0..10).collect{ fib.call(it) }.join(',') %>];
+{code}
+
+which is then cacheable and serveable as a javascript file as:
+
+{code}
+var fibonacci = [0,1,1,2,3,5,8,13,21,34,55];
+{code}
