@@ -1,4 +1,4 @@
-#GSP Resource plugin#
+#GSP Resources Plugin#
 This plugin allows you to reference GSP-generated files as cacheable static resources. Consider the following:
 **fibonacci.js.gsp**
 <pre><code>&lt;%fib = {n -&gt; return n &lt;= 1 ? n : fib(n-1) + fib(n-2)}%&gt;
