@@ -18,5 +18,8 @@ which is then cacheable and serveable as a javascript file as
 ##Limitations##
 Since this plugin is meant to serve *static* resources, there is no inherent data-watching within GSPs. Changes to a GSP file itself will trigger recompilation, but changes to the data referenced within a GSP will not.
 
+##User Guide##
+<a href="https://mckenfra.github.com/gsp-resources/docs/guide/single.html">https://mckenfra.github.com/gsp-resources/docs/guide/single.html</a>
+
 ##Special Thanks##
 Peter McNeil for his work on <a href="http://nerderg.com/GSParse">GSParse</a>, which was the inspiration for this plugin.
