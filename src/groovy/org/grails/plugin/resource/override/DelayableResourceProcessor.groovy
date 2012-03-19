@@ -1,7 +1,9 @@
 package org.grails.plugin.resource.override
 
 import org.apache.commons.logging.LogFactory;
+import org.grails.plugin.resource.ResourceMeta;
 import org.grails.plugin.resource.ResourceProcessor
+import org.grails.plugin.resource.ResourceProcessorBatch;
 
 /**
  * A class for optionally delaying resource processing until the bootstrap
@@ -155,5 +157,54 @@ class DelayableResourceProcessor extends ResourceProcessor {
     void afterPropertiesSet() {
         startup = getConfigParamOrDefault('processing.startup', true)
         super.afterPropertiesSet()
+    }
+    
+    /**
+     * The resources plugin for some reason does not apply the module dependency
+     * ordering to the resources batch when reloading modules.
+     * <p>
+     * This method first reorders the resource batch into the correct ordering,
+     * then calls the superclass method.
+     * <p>
+     * Note that ordering is important to GSP resources, because we have to
+     * ensure the resources the GSP depends on have been processed before the
+     * GSP itself! 
+     */
+    @Override
+    void prepareResourceBatch(ResourceProcessorBatch batch) {
+        def orderedNames = super.modulesInDependencyOrder
+        
+        // Ensure we have module ordering already
+        if (orderedNames) {
+            
+            // Log
+            if (log.isDebugEnabled()) {
+                log.debug "Reordering resources according to module dependency ordering: ${orderedNames}"
+            }
+            
+            // Create new resources set with correct ordering
+            LinkedHashSet<ResourceMeta> orderedResources = new LinkedHashSet<ResourceMeta>()
+            orderedNames.each { name ->
+                batch.each { r ->
+                    if (r.module.name == name) {
+                        orderedResources << r
+                    }
+                }
+            }
+            
+            // Just in case - add any resources that haven't yet been added
+            batch.each { orderedResources << it }
+            
+            // Copy ordered resources to new batch
+            ResourceProcessorBatch orderedBatch = new ResourceProcessorBatch()
+            orderedBatch.add(orderedResources as List)
+            
+            // Call superclass method with ordered batch
+            super.prepareResourceBatch(orderedBatch)
+            
+        // Ordering not found - just pass through for normal processing
+        } else {
+            super.prepareResourceBatch(batch)
+        }
     }
 }
