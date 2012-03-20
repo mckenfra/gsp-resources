@@ -1,3 +1,18 @@
+The preferred method for installing plugins is to add a plugin dependency
+in @grails-app/conf/BuildConfig.groovy@, i.e.:
+
+{code}
+plugins {
+    // Other plugin dependencies here
+    // . . .
+    // . . .
+
+    runtime ':gsp-resources:latest.integration'
+}
+{code}
+
+Alternatively, you can install manually with the following command:
+
 {code}
 grails install-plugin gsp-resources
 {code}

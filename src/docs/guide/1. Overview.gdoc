@@ -7,7 +7,7 @@ h3. fibonacci.js.gsp
 var fibonacci = [<%= (0..10).collect{ fib.call(it) }.join(',') %>];
 {code}
 
-which is then cacheable and serveable as a javascript file as:
+This is then cacheable and serveable as a javascript file as:
 
 {code}
 var fibonacci = [0,1,1,2,3,5,8,13,21,34,55];
