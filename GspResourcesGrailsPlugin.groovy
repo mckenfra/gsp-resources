@@ -1,6 +1,6 @@
 import org.grails.plugin.resource.gsp.GspResourceLocator
 import org.grails.plugin.resource.gsp.GspResourcePageRenderer
-import org.grails.plugin.resource.override.DelayableResourceProcessor
+import org.grails.plugin.resource.gsp.GspResourceProcessor
 
 class GspResourcesGrailsPlugin {
     def version = "0.3"
@@ -18,7 +18,7 @@ class GspResourcesGrailsPlugin {
             'web-app/**/*',
             '**/MyAppResources.groovy',
     ]
-
+    
     def author = "Stefan Kendall, Francis McKenzie"
     def authorEmail = "stefankendall@gmail.com, francis.mckenzie@gmail.com"
     def title = "GSP Resources"
@@ -44,11 +44,12 @@ class GspResourcesGrailsPlugin {
         }
         
         // Override processor in resources plugin
-        grailsResourceProcessor(DelayableResourceProcessor) {
+        grailsResourceProcessor(GspResourceProcessor) {
             grailsLinkGenerator = ref('grailsLinkGenerator')
             if (springConfig.containsBean('grailsResourceLocator')) {
                 grailsResourceLocator = ref('grailsResourceLocator')
             }
+            gspResourceLocator = ref('gspResourceLocator')
             grailsApplication = ref('grailsApplication')
         }
 	}
