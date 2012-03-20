@@ -33,7 +33,9 @@ function addJsClass(el) {
                             
                             <div class="toc-item" style="margin-left:0"><a href="#5.%20Advanced%20Configuration"><strong>5</strong><span>Advanced Configuration</span></a></div>
                             
-                            <div class="toc-item" style="margin-left:0"><a href="#6.%20Special%20Thanks"><strong>6</strong><span>Special Thanks</span></a></div>
+                            <div class="toc-item" style="margin-left:0"><a href="#6.%20Version%20History"><strong>6</strong><span>Version History</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0"><a href="#7.%20Special%20Thanks"><strong>7</strong><span>Special Thanks</span></a></div>
                             
                         </div>
                     </div>
@@ -80,7 +82,9 @@ function addJsClass(el) {
                             
                             <div class="toc-item" style="margin-left:0px"><a href="#5.%20Advanced%20Configuration"><strong>5</strong><span>Advanced Configuration</span></a></div>
                             
-                            <div class="toc-item" style="margin-left:0px"><a href="#6.%20Special%20Thanks"><strong>6</strong><span>Special Thanks</span></a></div>
+                            <div class="toc-item" style="margin-left:0px"><a href="#6.%20Version%20History"><strong>6</strong><span>Version History</span></a></div>
+                            
+                            <div class="toc-item" style="margin-left:0px"><a href="#7.%20Special%20Thanks"><strong>7</strong><span>Special Thanks</span></a></div>
                             
                             <div style="clear:both" ></div>
                         </div>
@@ -91,20 +95,32 @@ function addJsClass(el) {
 This plugin allows you to reference GSP-generated files as cacheable static resources.
 Consider the following:<p class="paragraph"/><h3>fibonacci.js.gsp</h3>
 <div class="code"><pre>&#60;% fib = &#123;n &#45;&#62;; <span class="java&#45;keyword">return</span> n &#60;= 1 ? n : fib(n&#45;1) + fib(n&#45;2)&#125; %&#62;
-<span class="java&#45;keyword">var</span> fibonacci = &#91;&#60;%= (0..10).collect&#123; fib.call(it) &#125;.join(',') %&#62;&#93;;</pre></div><p class="paragraph"/>which is then cacheable and serveable as a javascript file as:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">var</span> fibonacci = &#91;0,1,1,2,3,5,8,13,21,34,55&#93;;</pre></div>
+<span class="java&#45;keyword">var</span> fibonacci = &#91;&#60;%= (0..10).collect&#123; fib.call(it) &#125;.join(',') %&#62;&#93;;</pre></div><p class="paragraph"/>This is then cacheable and serveable as a javascript file as:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">var</span> fibonacci = &#91;0,1,1,2,3,5,8,13,21,34,55&#93;;</pre></div>
 
 
 
 <h1 id="2. Installation">2 Installation</h1>
-<div class="code"><pre>grails install&#45;plugin gsp&#45;resources</pre></div>
+The preferred method for installing plugins is to add a plugin dependency
+in <code>grails-app/conf/BuildConfig.groovy</code>, i.e.:<p class="paragraph"/><div class="code"><pre>plugins &#123;
+    // Other plugin dependencies here
+    // . . .
+    // . . .<p class="paragraph"/>    runtime ':gsp&#45;resources:latest.integration'
+&#125;</pre></div><p class="paragraph"/>Alternatively, you can install manually with the following command:<p class="paragraph"/><div class="code"><pre>grails install&#45;plugin gsp&#45;resources</pre></div>
 
 
 
 <h1 id="3. Usage">3 Usage</h1>
 In your project resources file, define GSPs as resources like any other resource type:<p class="paragraph"/><div class="code"><pre>'style' &#123;
-    resource url:'css/test.css.gsp', attrs:&#91;rel: 'stylesheet/css', type:'css'&#93;
+    resource url:'css/test.css.gsp'
+&#125;</pre></div><p class="paragraph"/>The GSP will be compiled to a file with exactly the same file path, but minus the '.gsp'
+extension. The type of the compiled file (i.e. in this case 'css') will be automatically
+detected from the filename. Should you wish to name your file with a file extension
+that is not recognised by the resources plugin, you can optionally explicitly define the
+file type of the compiled resource using the following example 	configuration:<p class="paragraph"/><div class="code"><pre>'style' &#123;
+    resource url:'somefile.gsp', attrs:&#91;rel: 'stylesheet/css', type:'css'&#93;
 &#125;</pre></div><p class="paragraph"/>Note the additional <code>attrs</code> parameter, which is used to tell
-the resources plugin the type of the resource being generated. 
+the resources plugin the type of the resource being generated. (In this example,
+the compiled file will simply be named 'somefile' with no extension.) 
 
 
 <h1 id="4. Limitations">4 Limitations</h1>
@@ -140,9 +156,13 @@ plugin defaults to its normal startup.
 
 
 
-<h1 id="6. Special Thanks">6 Special Thanks</h1>
-Peter McNeil for his work on <a href="http://nerderg.com/GSParse" target="blank">GSParse</a>,
-which was the inspiration for this plugin.<p class="paragraph"/>Marc Palmer for the excellent <a href="http://grails-plugins.github.com/grails-resources/guide/single.html" target="blank">resources plugin</a>,
+<h1 id="6. Version History">6 Version History</h1>
+<table class="wiki-table" cellpadding="0" cellspacing="0" border="0"><tr><th><strong class="bold">Version</strong></th><th><strong class="bold">Date</strong></th><th><strong class="bold">Description</strong></th></tr><tr class="table-odd"><td>0.3</td><td>Mar 21, 2012</td><td>Multiple fixes and enhancements:<br/> <br/> 1) Fix bug causing <code>createLink</code> to break after using gsp-resources<br/> 2) Fix bug causing <code>resource(dir:"/")</code> to render incorrect context path<br/> 3) Automatically detect compiled file type from filename<br/> 4) Support <code>&#60;r:require/&#62;</code>, <code>&#60;g:include/&#62;</code> etc. in GSPs<br/> 5) Support GSP resources in plugins <br/> 6) Allow delaying resources processing until bootstrap phase<br/> 7) Process resources in order of <code>dependsOn</code> config</td></tr><tr class="table-even"><td>0.2.1</td><td>Oct 25, 2011</td><td>Set included resources version to 1.1.1, dependsOn to '1.0.2 &#62; *'</td></tr><tr class="table-odd"><td>0.2</td><td>Oct 22, 2011</td><td>Fixed g:createLink<br/>Made plugin compatible with 2.0RC1.</td></tr><tr class="table-even"><td>0.1</td><td>Oct 15, 2011</td><td>Initial implementation</td></tr></table>
+
+
+<h1 id="7. Special Thanks">7 Special Thanks</h1>
+Stefan Kendall for creating the original <a href="../ref/Httpsgithubcomstefankendallgspresources/gsp-resources plugin.html" class="https://github.com/stefankendall/gsp-resources">gsp-resources plugin</a>,
+which was superb and inspired me to get involved to help make it even better!<p class="paragraph"/>Marc Palmer for the excellent <a href="http://grails-plugins.github.com/grails-resources/guide/single.html" target="blank">resources plugin</a>,
 without which this plugin would not be possible. 
 
 

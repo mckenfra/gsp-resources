@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>3 Usage 0.3</title>
+    <title>7 Special Thanks 0.3</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -68,18 +68,16 @@ function addJsClass() {
             <div id="main" class="corner-all">
 
                 
-                    <div class="toc-item prev-left"><a href="../guide/2.%20Installation.html">&lt;&lt; <strong>2</strong><span>Installation</span></a></div>
+                    <div class="toc-item prev-left"><a href="../guide/6.%20Version%20History.html">&lt;&lt; <strong>6</strong><span>Version History</span></a></div>
                 
 
                 <span id='toggle-col1' class="toggle">(<a href="#" onclick="localToggle(); return false;">Quick Reference</a>)</span>
 
                 
-                    <div class="toc-item next-right"><a href="../guide/4.%20Limitations.html"><strong>4</strong><span>Limitations</span> >></a></div>
-                
 
 
                 <div class="project">
-                    <h1>3 Usage - Reference Documentation</h1>
+                    <h1>7 Special Thanks - Reference Documentation</h1>
 
                     <p><strong>Authors:</strong> Stefan Kendall, Francis McKenzie</p>
 
@@ -92,25 +90,16 @@ function addJsClass() {
 
                 
 
-<h1 id="3. Usage">3 Usage</h1>
-In your project resources file, define GSPs as resources like any other resource type:<p class="paragraph"/><div class="code"><pre>'style' &#123;
-    resource url:'css/test.css.gsp'
-&#125;</pre></div><p class="paragraph"/>The GSP will be compiled to a file with exactly the same file path, but minus the '.gsp'
-extension. The type of the compiled file (i.e. in this case 'css') will be automatically
-detected from the filename. Should you wish to name your file with a file extension
-that is not recognised by the resources plugin, you can optionally explicitly define the
-file type of the compiled resource using the following example 	configuration:<p class="paragraph"/><div class="code"><pre>'style' &#123;
-    resource url:'somefile.gsp', attrs:&#91;rel: 'stylesheet/css', type:'css'&#93;
-&#125;</pre></div><p class="paragraph"/>Note the additional <code>attrs</code> parameter, which is used to tell
-the resources plugin the type of the resource being generated. (In this example,
-the compiled file will simply be named 'somefile' with no extension.) 
+<h1 id="7. Special Thanks">7 Special Thanks</h1>
+Stefan Kendall for creating the original <a href="../ref/Httpsgithubcomstefankendallgspresources/gsp-resources plugin.html" class="https://github.com/stefankendall/gsp-resources">gsp-resources plugin</a>,
+which was superb and inspired me to get involved to help make it even better!<p class="paragraph"/>Marc Palmer for the excellent <a href="http://grails-plugins.github.com/grails-resources/guide/single.html" target="blank">resources plugin</a>,
+without which this plugin would not be possible. 
+
 
 
                 <div style="clear:both;margin-top:15px;"></div>
                 
-                    <div class="toc-item prev-left"><a href="../guide/2.%20Installation.html">&lt;&lt; <strong>2</strong><span>Installation</span></a></div>
-                
-                    <div class="toc-item next-right"><a href="../guide/4.%20Limitations.html"><strong>4</strong><span>Limitations</span> >></a></div>
+                    <div class="toc-item prev-left"><a href="../guide/6.%20Version%20History.html">&lt;&lt; <strong>6</strong><span>Version History</span></a></div>
                 
                 <div style="clear:both"></div>
             </div>

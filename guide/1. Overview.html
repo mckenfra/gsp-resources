@@ -39,7 +39,10 @@ function addJsClass() {
                     <div class="toc-item" style="margin-left:0"><a href="../guide/5.%20Advanced%20Configuration.html"><strong>5</strong><span>Advanced Configuration</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../guide/6.%20Special%20Thanks.html"><strong>6</strong><span>Special Thanks</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/6.%20Version%20History.html"><strong>6</strong><span>Version History</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/7.%20Special%20Thanks.html"><strong>7</strong><span>Special Thanks</span></a>
                     </div>
                     
                 </div>
@@ -91,7 +94,7 @@ function addJsClass() {
 This plugin allows you to reference GSP-generated files as cacheable static resources.
 Consider the following:<p class="paragraph"/><h3>fibonacci.js.gsp</h3>
 <div class="code"><pre>&#60;% fib = &#123;n &#45;&#62;; <span class="java&#45;keyword">return</span> n &#60;= 1 ? n : fib(n&#45;1) + fib(n&#45;2)&#125; %&#62;
-<span class="java&#45;keyword">var</span> fibonacci = &#91;&#60;%= (0..10).collect&#123; fib.call(it) &#125;.join(',') %&#62;&#93;;</pre></div><p class="paragraph"/>which is then cacheable and serveable as a javascript file as:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">var</span> fibonacci = &#91;0,1,1,2,3,5,8,13,21,34,55&#93;;</pre></div>
+<span class="java&#45;keyword">var</span> fibonacci = &#91;&#60;%= (0..10).collect&#123; fib.call(it) &#125;.join(',') %&#62;&#93;;</pre></div><p class="paragraph"/>This is then cacheable and serveable as a javascript file as:<p class="paragraph"/><div class="code"><pre><span class="java&#45;keyword">var</span> fibonacci = &#91;0,1,1,2,3,5,8,13,21,34,55&#93;;</pre></div>
 
 
 

@@ -39,7 +39,10 @@ function addJsClass() {
                     <div class="toc-item" style="margin-left:0"><a href="../guide/5.%20Advanced%20Configuration.html"><strong>5</strong><span>Advanced Configuration</span></a>
                     </div>
                     
-                    <div class="toc-item" style="margin-left:0"><a href="../guide/6.%20Special%20Thanks.html"><strong>6</strong><span>Special Thanks</span></a>
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/6.%20Version%20History.html"><strong>6</strong><span>Version History</span></a>
+                    </div>
+                    
+                    <div class="toc-item" style="margin-left:0"><a href="../guide/7.%20Special%20Thanks.html"><strong>7</strong><span>Special Thanks</span></a>
                     </div>
                     
                 </div>
@@ -90,7 +93,12 @@ function addJsClass() {
                 
 
 <h1 id="2. Installation">2 Installation</h1>
-<div class="code"><pre>grails install&#45;plugin gsp&#45;resources</pre></div>
+The preferred method for installing plugins is to add a plugin dependency
+in <code>grails-app/conf/BuildConfig.groovy</code>, i.e.:<p class="paragraph"/><div class="code"><pre>plugins &#123;
+    // Other plugin dependencies here
+    // . . .
+    // . . .<p class="paragraph"/>    runtime ':gsp&#45;resources:latest.integration'
+&#125;</pre></div><p class="paragraph"/>Alternatively, you can install manually with the following command:<p class="paragraph"/><div class="code"><pre>grails install&#45;plugin gsp&#45;resources</pre></div>
 
 
 
