@@ -26,10 +26,11 @@ class GspResourceLocator implements ServletContextAware {
     ServletContext servletContext
     
     /**
-     * Checks for .gsp suffix in filename
+     * Checks for .gsp suffix in filename or uri
      */
-    public boolean isFileGspFile(File file) {
-        return file && GSP_FILE_EXTENSIONS.any { file.name.toLowerCase().endsWith(it) }
+    public boolean isGsp(fileOrUri) {
+        def name = fileOrUri?.toString()?.toLowerCase()
+        return name && GSP_FILE_EXTENSIONS.any { name.endsWith(it) }
     }
 
     /**
@@ -93,7 +94,7 @@ class GspResourceLocator implements ServletContextAware {
                 
                 // Check if GSP
                 File file = resource.file
-                if (isFileGspFile(file)) {
+                if (isGsp(file)) {
                     result = file
                 }
             }
@@ -120,7 +121,7 @@ class GspResourceLocator implements ServletContextAware {
                 
                 // Check if GSP
                 File file = new File(servletContext.getRealPath(resource.URI))
-                if (isFileGspFile(file)) {
+                if (isGsp(file)) {
                     result = file
                 }
             }
@@ -147,7 +148,7 @@ class GspResourceLocator implements ServletContextAware {
 
                 // Check if GSP
                 File file = new File(servletContext.getRealPath(resource.URI))
-                if (isFileGspFile(file)) {
+                if (isGsp(file)) {
                     result = file
                 }
             }
