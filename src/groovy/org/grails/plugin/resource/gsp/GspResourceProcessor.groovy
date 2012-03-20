@@ -1,4 +1,4 @@
-package org.grails.plugin.resource.override
+package org.grails.plugin.resource.gsp
 
 import org.apache.commons.logging.LogFactory;
 import org.grails.plugin.resource.ResourceMeta;
@@ -6,13 +6,24 @@ import org.grails.plugin.resource.ResourceProcessor
 import org.grails.plugin.resource.ResourceProcessorBatch;
 
 /**
- * A class for optionally delaying resource processing until the bootstrap
- * phase during startup.
- * <p>
- * This is important for GSPs, as it ensures the GSP resources are compiled
- * <b>after</b> everything else is loaded.
- * <p>
- * Note that this class works by temporarily blocking the call to reloadAll(),
+ * Overrides the resources plugin's ResourceProcessor, to provide additional
+ * features required for GSP processing:
+ * <ul>
+ * <li>Optionally delay resources processing until the bootstrap phase,
+ * to ensure any GSP dependencies (e.g. domain objects / other plugins) are
+ * fully loaded before GSP compilation starts.</li>
+ * 
+ * <li>Ensure resource modules are loaded in correct order, according to
+ * 'dependsOn' configuration settings. This ensures any <b>resources</b> your GSP
+ * depends on are loaded before compilation starts.</li>
+ * 
+ * <li>Automatically detect the target file type of the GSP by the filename
+ * extension. E.g. myfile.js.gsp will be automatically detected as being
+ * a javascript resource</li>
+ * </ul>
+ * 
+ * Note that the (optional) delaying of resources processing until bootstrap is
+ * achieved by temporarily blocking the call to reloadAll(),
  * which the resources plugin calls on server startup. When the gsp-resources
  * plugin loads, it either allows the reloadAll() to go ahead right-away,
  * or delays it until the bootstrap phase, depending on the configuration
@@ -55,8 +66,11 @@ import org.grails.plugin.resource.ResourceProcessorBatch;
  *
  * @author Francis McKenzie
  */
-class DelayableResourceProcessor extends ResourceProcessor {
+class GspResourceProcessor extends ResourceProcessor {
     def log = LogFactory.getLog(this.class)
+    
+    // Injected - for stripping off GSP filename suffix
+    GspResourceLocator gspResourceLocator
 
     // We only want to block the first reload
     protected boolean firstReloadAllDone = false 
@@ -206,5 +220,32 @@ class DelayableResourceProcessor extends ResourceProcessor {
         } else {
             super.prepareResourceBatch(batch)
         }
+    }
+    
+    /**
+     * The resources plugin doesn't recognise resources ending with '.gsp'.
+     * This method tries to find the target resources type by first stripping
+     * off the '.gsp' (if it exists). This should work for GSP resource files
+     * named like myscript.js.gsp
+     * 
+     * Note that if all else fails, you can use the 'attrs' resources
+     * configuration setting to manually tell the resources plugin
+     * the type of the compiled resource. 
+     */
+    @Override
+    def getDefaultSettingsForURI(uri, typeOverride = null) {
+        // Try superclass first
+        def result = super.getDefaultSettingsForURI(uri, typeOverride)
+        
+        // No type - could be unrecognised because is GSP
+        if (!result && uri && !typeOverride) {
+            def bareUri = removeQueryParams(uri)
+            if (gspResourceLocator.isGsp(bareUri)) {
+                def targetUri = gspResourceLocator.generateCompiledFilenameFromOriginal(bareUri)
+                result = super.getDefaultSettingsForURI(targetUri)
+            }
+        }
+        
+        return result
     }
 }
