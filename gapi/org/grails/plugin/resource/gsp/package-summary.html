@@ -129,6 +129,16 @@ Package org.grails.plugin.resource.gsp
  render operations outside a web request</TD>
         </TR>
 
+        <TR BGCOLOR="white" CLASS="TableRowColor">
+        <TD WIDTH="15%"><B><A HREF="GspResourceProcessor.html" title="class in org/grails/plugin/resource/gsp">GspResourceProcessor</A></B></TD>
+        <TD>Overrides the resources plugin's ResourceProcessor, to provide additional
+ features required for GSP processing:
+ <ul>
+ <li>Optionally delay resources processing until the bootstrap phase,
+ to ensure any GSP dependencies (e.g. domain objects / other plugins) are
+ fully loaded before GSP compilation starts.</TD>
+        </TR>
+
 </TABLE>
 &nbsp;
 <P>
