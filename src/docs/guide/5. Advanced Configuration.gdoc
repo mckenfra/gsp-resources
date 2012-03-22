@@ -1,4 +1,4 @@
-One limitation of the resources plugin in connection with gsp compilation
+One limitation of the resources plugin in connection with GSP compilation
 is that the processing of static resources takes place during server startup.
 
 In fact, the processing could take place before a lot of the core grails
@@ -9,7 +9,7 @@ your GSP. This will result in errors!
 
 To get around this, the gsp-resources plugin provides an additional configuration
 option, for delaying the start of resources processing during server startup. The
-following configuration option should be placed in Config.groovy:
+following configuration option should be placed in @grails-app/conf/Config.groovy@:
 
 {code}
 grails.resources.processing.startup = "delayed"

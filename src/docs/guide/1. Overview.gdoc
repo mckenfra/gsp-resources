@@ -9,6 +9,7 @@ var fibonacci = [<%= (0..10).collect{ fib.call(it) }.join(',') %>];
 
 This is then cacheable and serveable as a javascript file as:
 
+h3. fibonacci.js
 {code}
 var fibonacci = [0,1,1,2,3,5,8,13,21,34,55];
 {code}
