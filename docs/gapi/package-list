@@ -1,0 +1,4 @@
+DefaultPackage
+gsp.resources
+org.grails.plugin.resource.gsp
+org.grails.plugin.resource.gsp.test
