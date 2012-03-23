@@ -3,7 +3,7 @@ import org.grails.plugin.resource.gsp.GspResourcePageRenderer
 import org.grails.plugin.resource.gsp.GspResourceProcessor
 
 class GspResourcesGrailsPlugin {
-    def version = "0.3"
+    def version = "0.31-SNAPSHOT"
     def grailsVersion = "2.0.0 > *"
     def dependsOn = [
         'resources': '1.1.5 > *',
@@ -34,7 +34,6 @@ class GspResourcesGrailsPlugin {
 			bean.lazyInit = true
 			groovyPageLocator = groovyPageLocator
 			grailsResourceLocator = grailsResourceLocator
-            grailsApplication = application
 		}
         
         gspResourceLocator(GspResourceLocator) { bean ->
