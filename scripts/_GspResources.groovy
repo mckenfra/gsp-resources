@@ -4,7 +4,10 @@ includeTargets << grailsScript("_GrailsCompile")
 srcDir="src/lib/groovy"
 tgtDir="target/lib"
 libDir="lib"
-jarFile="${libDir}/background-servlet.jar"
+jarFile="${libDir}/background-servlet-2.5.jar"
+servlet25Library="${grailsHome}/lib/javax.servlet/servlet-api/jars/servlet-api-2.5.jar"
+grailsLibDir="${grailsHome}/lib"
+grailsDistDir="${grailsHome}/dist"
 
 target(init: "Create dirs") {
     Ant.mkdir(dir: "${tgtDir}")
@@ -13,7 +16,30 @@ target(init: "Create dirs") {
 
 target(compile: "compile the library source") {
     depends("init")
-    groovyc(srcdir: "${srcDir}", destdir: "${tgtDir}")
+    
+    // Compile for servlet 3.0 - default classpath is enough
+    //groovyc(srcdir: "${srcDir}", destdir: "${tgtDir}")
+    
+    // Build classpath for compile for servlet 2.5
+    def grailsLibJars = Ant.fileset(dir: "${grailsLibDir}") {
+        include(name: "**/*.jar")
+    }
+    def grailsDistJars = Ant.fileset(dir: "${grailsDistDir}") {
+        include(name: "**/*.jar")
+    }
+
+    Ant.path(id: "servlet25") {
+        pathelement(location:"${servlet25Library}")
+        grailsLibJars.each {
+            pathelement(location:it)
+        }
+        grailsDistJars.each {
+            pathelement(location:it)
+        }
+    }
+    
+    // Compile for servlet 2.5 - use custom classpath
+    groovyc(srcdir: "${srcDir}", destdir: "${tgtDir}", fork:true, failonerror:true, classpathref:"servlet25")
 }
 
 target(jar: "create the library jar") {

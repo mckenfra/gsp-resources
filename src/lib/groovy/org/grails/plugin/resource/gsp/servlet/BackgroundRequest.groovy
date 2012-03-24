@@ -17,9 +17,9 @@ import javax.servlet.http.HttpServletResponse
 import javax.servlet.http.HttpSession
 
 // Servlet 3.0
-import javax.servlet.AsyncContext;
-import javax.servlet.DispatcherType;
-import javax.servlet.http.Part;
+//import javax.servlet.AsyncContext;
+//import javax.servlet.DispatcherType;
+//import javax.servlet.http.Part;
 // Servlet 3.0
 
 import org.apache.commons.collections.iterators.IteratorEnumeration
@@ -184,42 +184,42 @@ public class BackgroundRequest implements HttpServletRequest {
     // SERVLET 2.x
     
     // SERVLET 3.0
-    public boolean isAsyncStarted() { false }
-
-    public boolean isAsyncSupported() { false }
-
-    public boolean authenticate(HttpServletResponse response)
-            throws IOException, ServletException { false }
-
-    public void login(String username, String password) throws ServletException { /** No-op **/ }
-
-    public void logout() throws ServletException { /** No-op **/ }
-
-    public ServletContext getServletContext() { this._servletContext }
-
-    public javax.servlet.DispatcherType getDispatcherType() { javax.servlet.DispatcherType.REQUEST }
-
-    public javax.servlet.AsyncContext startAsync() {
-        throw new UnsupportedOperationException("You cannot get start async in non-request rendering operations")
-    }
-
-    public javax.servlet.AsyncContext startAsync(ServletRequest servletRequest,
-            ServletResponse servletResponse) {
-        throw new UnsupportedOperationException("You cannot get start async in non-request rendering operations")
-    }
-
-    public javax.servlet.AsyncContext getAsyncContext() {
-        throw new UnsupportedOperationException("You cannot get get async context in non-request rendering operations")
-    }
-
-    public Collection<javax.servlet.http.Part> getParts() throws IOException,
-            IllegalStateException, ServletException {
-        throw new UnsupportedOperationException("You cannot get get parts in non-request rendering operations")
-    }
-
-    public javax.servlet.http.Part getPart(String name) throws IOException,
-            IllegalStateException, ServletException {
-        throw new UnsupportedOperationException("You cannot get get part in non-request rendering operations")
-    }
+//    public boolean isAsyncStarted() { false }
+//
+//    public boolean isAsyncSupported() { false }
+//
+//    public boolean authenticate(HttpServletResponse response)
+//            throws IOException, ServletException { false }
+//
+//    public void login(String username, String password) throws ServletException { /** No-op **/ }
+//
+//    public void logout() throws ServletException { /** No-op **/ }
+//
+//    public ServletContext getServletContext() { this._servletContext }
+//
+//    public javax.servlet.DispatcherType getDispatcherType() { javax.servlet.DispatcherType.REQUEST }
+//
+//    public javax.servlet.AsyncContext startAsync() {
+//        throw new UnsupportedOperationException("You cannot get start async in non-request rendering operations")
+//    }
+//
+//    public javax.servlet.AsyncContext startAsync(ServletRequest servletRequest,
+//            ServletResponse servletResponse) {
+//        throw new UnsupportedOperationException("You cannot get start async in non-request rendering operations")
+//    }
+//
+//    public javax.servlet.AsyncContext getAsyncContext() {
+//        throw new UnsupportedOperationException("You cannot get get async context in non-request rendering operations")
+//    }
+//
+//    public Collection<javax.servlet.http.Part> getParts() throws IOException,
+//            IllegalStateException, ServletException {
+//        throw new UnsupportedOperationException("You cannot get get parts in non-request rendering operations")
+//    }
+//
+//    public javax.servlet.http.Part getPart(String name) throws IOException,
+//            IllegalStateException, ServletException {
+//        throw new UnsupportedOperationException("You cannot get get part in non-request rendering operations")
+//    }
     // SERVLET 3.0
 }

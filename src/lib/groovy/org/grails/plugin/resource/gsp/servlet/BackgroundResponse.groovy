@@ -95,10 +95,10 @@ public class BackgroundResponse implements HttpServletResponse {
     // Servlet 2.x
     
     // Servlet 3.0
-    public Collection<String> getHeaders(String name) { this._headers.get(name) ?: [] }
-    
-    public Collection<String> getHeaderNames() { this._headers.keySet() }
-            
-    public String getHeader(String name) { this._headers.get(name)?.get(0) }
+//    public Collection<String> getHeaders(String name) { this._headers.get(name) ?: [] }
+//    
+//    public Collection<String> getHeaderNames() { this._headers.keySet() }
+//            
+//    public String getHeader(String name) { this._headers.get(name)?.get(0) }
     // Servlet 3.0
 }
