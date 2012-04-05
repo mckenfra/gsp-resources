@@ -64,6 +64,7 @@ class GspResourceMapper {
                 gspResource.contentType = resource.contentType
                 gspResource.disposition = resource.disposition
                 gspResource.gsp = gsp
+                gspResource.attributes = resource.attributes
                 gspResource.gspResourceLocator = gspResourceLocator
                 gspResource.gspResourcePageRenderer = gspResourcePageRenderer
                 if (log.isDebugEnabled()) {
