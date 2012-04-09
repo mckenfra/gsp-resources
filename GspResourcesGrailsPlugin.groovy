@@ -3,7 +3,7 @@ import org.grails.plugin.resource.gsp.GspResourcePageRenderer
 import org.grails.plugin.resource.gsp.GspResourceProcessor
 
 class GspResourcesGrailsPlugin {
-    def version = "0.31"
+    def version = "0.31.1"
     def grailsVersion = "2.0.0 > *"
     def dependsOn = [
         'resources': '1.1.5 > *',
