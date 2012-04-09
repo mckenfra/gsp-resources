@@ -24,7 +24,7 @@ class GspResourcesGrailsPlugin {
     def title = "GSP Resources"
     def description = 'Use resources plugin to serve dynamically-built CSS and JS as static files instead of dynamic (non-cacheable) GSPs.'
 
-    def documentation = "http://mckenfra.github.com/gsp-resources/guide/single.html"
+    def documentation = "http://mckenfra.github.com/gsp-resources/docs/guide/single.html"
 
     def scm = [url: "https://github.com/mckenfra/gsp-resources"]
 	
