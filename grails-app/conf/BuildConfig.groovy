@@ -29,7 +29,7 @@ grails.project.dependency.resolution = {
     dependencies {
     }
     plugins {
-        build(":release:2.0.0.BUILD-SNAPSHOT") {
+        build(":release:latest.integration") {
             export = false
         }
         runtime "org.grails.plugins:resources:latest.integration"
