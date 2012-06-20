@@ -1,5 +1,6 @@
 package org.grails.plugin.resource.gsp
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.LogFactory;
 import org.grails.plugin.resource.ResourceMeta;
 import org.grails.plugin.resource.ResourceProcessor
@@ -227,7 +228,7 @@ class GspResourceProcessor extends ResourceProcessor {
      * This method tries to find the target resources type by first stripping
      * off the '.gsp' (if it exists). This should work for GSP resource files
      * named like myscript.js.gsp
-     * 
+     * <p>
      * Note that if all else fails, you can use the 'attrs' resources
      * configuration setting to manually tell the resources plugin
      * the type of the compiled resource. 
@@ -243,9 +244,38 @@ class GspResourceProcessor extends ResourceProcessor {
             if (gspResourceLocator.isGsp(bareUri)) {
                 def targetUri = gspResourceLocator.generateCompiledFilenameFromOriginal(bareUri)
                 result = super.getDefaultSettingsForURI(targetUri)
+                
+                // Set type attribute in module definition if not explicitly configured
+                if (result && !(result.attrs?.type)) {
+                    def type = getResourceTypeFromUri(targetUri)
+                    if (type) {
+                        if (result.attrs) {
+                            result.attrs.type = type
+                        } else {
+                            result.attrs = [type:type]
+                        }
+                    }
+                }
             }
         }
         
         return result
+    }
+    
+    /**
+     * Gets the resource type for the specified uri.
+     * <p>
+     * Note that this method treats some file types as javascript resources,
+     * since the Resources plugin will not recognise them otherwise. These 
+     * include: html, xhtml, xml, csv
+     */
+    def getResourceTypeFromUri(String uri) {
+        if (gspResourceLocator.isGsp(uri)) {
+            uri = gspResourceLocator.generateCompiledFilenameFromOriginal(uri)
+        }
+        String type = uri ? FilenameUtils.getExtension(uri) : null
+        // Explicitly support xml/html files with this 'hack'
+        type = type in ['html','htm','xhtml','xml','csv'] ? 'js' : type
+        return type
     }
 }

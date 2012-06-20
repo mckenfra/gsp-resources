@@ -2,6 +2,7 @@ package org.grails.plugin.resource.gsp
 
 import org.apache.commons.logging.LogFactory
 import org.grails.plugin.resource.mapper.MapperPhase
+import org.grails.plugin.resource.ResourceMeta
 import org.grails.plugin.resource.gsp.GspResourceLocator
 import org.grails.plugin.resource.gsp.GspResourceMeta
 import org.grails.plugin.resource.gsp.GspResourcePageRenderer
@@ -65,8 +66,10 @@ class GspResourceMapper {
                 gspResource.disposition = resource.disposition
                 gspResource.gsp = gsp
                 gspResource.attributes = resource.attributes
+                gspResource.tagAttributes = resource.tagAttributes
                 gspResource.gspResourceLocator = gspResourceLocator
                 gspResource.gspResourcePageRenderer = gspResourcePageRenderer
+                ensureHasTypeAttribute(gspResource)
                 if (log.isDebugEnabled()) {
                     log.debug "Created synthetic GSP resource: ${actualUrl}"
                 }
@@ -76,9 +79,45 @@ class GspResourceMapper {
                 }
             }
             resource.delegateTo(gspResource)
+            // Ensure the type attribute is set on the original resource too,
+            // otherwise we get 'unrecognised type' exceptions
+            ensureHasTypeAttribute(resource)
         } else {
             if (log.isDebugEnabled()) {
                 log.debug "Not a GSP: ${resource.sourceUrl}"
+            }
+        }
+    }
+    
+    /**
+     * Ensures the 'type' attribute is set for the GSP resource in the 
+     * resource meta 'tagAttributes' field.
+     * 
+     * @param resource The resource meta for the GSP resource
+     */
+    protected void ensureHasTypeAttribute(ResourceMeta resource) {
+        if (!resource) {
+            throw new NullPointerException("No ResourceMeta specified!")
+        }
+        
+        // Already set
+        if (resource.tagAttributes?.type) {
+            return
+        }
+        
+        // Ensure we have the right processor
+        if (! (grailsResourceProcessor instanceof GspResourceProcessor)) {
+            log.warn "Unable to set GSP resource type - grailsResourceProcessor not recognised: ${grailsResourceProcessor?.class}"
+            return
+        }
+        
+        // Set the type explicitly
+        def type = grailsResourceProcessor.getResourceTypeFromUri(resource.actualUrl)
+        if (type) {
+            if (resource.tagAttributes) {
+                resource.tagAttributes.type = type
+            } else {
+                resource.tagAttributes = [type:type]
             }
         }
     }
