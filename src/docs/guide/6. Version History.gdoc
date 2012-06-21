@@ -1,5 +1,6 @@
 {table}
  *Version* | *Date* | *Description*
+ 0.31.3 | Jun 23, 2012 | Bugfixes:\\- Support @grails.resources.debug@ config setting\\- Generated files now saved in @~/.grails@, like other resources plugins
  0.31 | Mar 23, 2012 | Made compatible with Servlet 2.5 (already 3.0)
  0.3 | Mar 21, 2012 | Multiple fixes and enhancements:\\ \\ 1) Fix bug causing @createLink@ to break after using gsp-resources\\ 2) Fix bug causing @resource(dir:"/")@ to render incorrect context path\\ 3) Automatically detect compiled file type from filename\\ 4) Support @<r:require/>@, @<g:include/>@ etc. in GSPs\\ 5) Support GSP resource files located in plugins \\ 6) Allow delaying resources processing until bootstrap phase\\ 7) Process resources in order of @dependsOn@ config 
  0.2.1 | Oct 25, 2011 | Set included resources version to 1.1.1, dependsOn to '1.0.2 > *'

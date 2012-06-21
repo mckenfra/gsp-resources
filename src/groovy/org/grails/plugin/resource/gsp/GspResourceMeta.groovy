@@ -27,28 +27,28 @@ class GspResourceMeta extends ResourceMeta {
     @Override
     void beginPrepare(grailsResourceProcessor) {
         if (grailsResourceProcessor && gspResourcePageRenderer && gspResourceLocator && gsp && gsp.file && gsp.type && gsp.uri) {
-            
+
             // Generate the target file from the GSP
-            String outputFilename = gspResourceLocator.generateCompiledFilenameFromOriginal(gsp.file.absolutePath)
-            File output = new File(outputFilename)
+            actualUrl = sourceUrl
+            processedFile = grailsResourceProcessor.makeFileForURI(actualUrl)
+            processedFile.createNewFile()
             
             // Compile
             if (log.isDebugEnabled()) {
-                log.debug "Compiling GSP - From: ${gsp.file} To: ${output}"
+                log.debug "Compiling GSP - From: ${gsp.file} To: ${processedFile}"
             }
             String compiledText = compileGsp(gsp)
             
             // Check returned something
             if (compiledText) {
-                output.write(compiledText, "UTF-8")
-                output.setLastModified(gsp.file.lastModified())
+                processedFile.write(compiledText, "UTF-8")
+                processedFile.setLastModified(gsp.file.lastModified())
                 
                 // Update this resource
-                this.processedFile = output
                 this.actualUrl = this.sourceUrl
                 
                 if (log.isDebugEnabled()) {
-                    log.debug "Compiled GSP - From: ${gsp.file} To: ${output}"
+                    log.debug "Compiled GSP - From: ${gsp.file} To: ${processedFile}"
                 }
                
             // Compile returned nothing - log a warning, and give up

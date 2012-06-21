@@ -6,7 +6,7 @@ In your project resources file, define GSPs as resources like any other resource
 }
 {code}
 
-The GSP will be compiled to a file with exactly the same file path, but minus the '.gsp'
+The GSP will be compiled to a file with exactly the same URI, but minus the '.gsp'
 extension. The type of the compiled file (i.e. in this case 'css') will be automatically
 detected from the filename. Should you wish to name your file with a file extension
 that is not recognised by the resources plugin, you can optionally explicitly define the
