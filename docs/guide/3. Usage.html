@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>3 Usage 0.31</title>
+    <title>3 Usage 0.31.3-SNAPSHOT</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -83,7 +83,7 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> Stefan Kendall, Francis McKenzie</p>
 
-                    <p><strong>Version:</strong> 0.31</p>
+                    <p><strong>Version:</strong> 0.31.3-SNAPSHOT</p>
 
                     
                 </div>
@@ -95,7 +95,7 @@ function addJsClass() {
 <h1 id="3. Usage">3 Usage</h1>
 In your project resources file, define GSPs as resources like any other resource type:<p class="paragraph"/><div class="code"><pre>'style' &#123;
     resource url:'css/test.css.gsp'
-&#125;</pre></div><p class="paragraph"/>The GSP will be compiled to a file with exactly the same file path, but minus the '.gsp'
+&#125;</pre></div><p class="paragraph"/>The GSP will be compiled to a file with exactly the same URI, but minus the '.gsp'
 extension. The type of the compiled file (i.e. in this case 'css') will be automatically
 detected from the filename. Should you wish to name your file with a file extension
 that is not recognised by the resources plugin, you can optionally explicitly define the
