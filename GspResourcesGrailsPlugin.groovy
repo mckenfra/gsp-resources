@@ -1,6 +1,6 @@
-import org.grails.plugin.resource.gsp.GspResourceLocator
-import org.grails.plugin.resource.gsp.GspResourcePageRenderer
-import org.grails.plugin.resource.gsp.GspResourceProcessor
+import org.grails.plugin.gspresources.GspResourceLocator
+import org.grails.plugin.gspresources.GspResourcePageRenderer
+import org.grails.plugin.gspresources.GspResourceProcessor
 
 class GspResourcesGrailsPlugin {
     def version = "0.31.3-SNAPSHOT"
