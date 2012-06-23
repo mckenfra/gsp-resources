@@ -1,7 +1,7 @@
-package org.grails.plugin.resource.gsp.test
+package org.grails.plugin.gspresources.test
 
 import org.codehaus.groovy.grails.plugins.web.taglib.ApplicationTagLib
-import org.grails.plugin.resource.gsp.GspResourcePageRenderer;
+import org.grails.plugin.gspresources.GspResourcePageRenderer;
 
 class GspResourcePageRendererTest extends GroovyTestCase {
     // Injected

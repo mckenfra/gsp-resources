@@ -1,8 +1,7 @@
-package org.grails.plugin.resource.gsp
+package org.grails.plugin.gspresources
 
 import org.apache.commons.logging.LogFactory
 import org.grails.plugin.resource.ResourceMeta
-import org.grails.plugin.resource.gsp.GspResourcePageRenderer
 
 /**
  * Synthetic resource that compiles a GSP to a target file.

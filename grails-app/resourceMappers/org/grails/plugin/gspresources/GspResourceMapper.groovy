@@ -1,8 +1,7 @@
-package org.grails.plugin.resource.gsp
+package org.grails.plugin.gspresources
 
 import org.apache.commons.logging.LogFactory
 import org.grails.plugin.resource.mapper.MapperPhase
-import org.grails.plugin.resource.gsp.GspResourceLocator
 
 /**
  * A mapper for compiling GSP resource files.

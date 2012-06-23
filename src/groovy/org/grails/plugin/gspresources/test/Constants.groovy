@@ -1,4 +1,4 @@
-package org.grails.plugin.resource.gsp.test
+package org.grails.plugin.gspresources.test
 class Constants {
     public static int ONE = 1
 }

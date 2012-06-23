@@ -1,4 +1,4 @@
-package org.grails.plugin.resource.gsp
+package org.grails.plugin.gspresources
 
 import javax.servlet.ServletContext
 import javax.servlet.http.Cookie
