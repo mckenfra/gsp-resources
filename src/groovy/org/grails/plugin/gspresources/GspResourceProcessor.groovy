@@ -11,7 +11,8 @@ import org.grails.plugin.resource.ResourceProcessorBatch;
 
 /**
  * Overrides the resources plugin's ResourceProcessor, to provide additional
- * features required for GSP processing:
+ * features required for GSP processing
+ * <p>
  * <ul>
  * <li>Optionally delay resources processing until the bootstrap phase,
  * to ensure any GSP dependencies (e.g. domain objects / other plugins) are
