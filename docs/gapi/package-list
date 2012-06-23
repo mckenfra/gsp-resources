@@ -1,4 +1,2 @@
-DefaultPackage
-gsp.resources
 org.grails.plugin.gspresources
 org.grails.plugin.gspresources.test
