@@ -48,6 +48,7 @@ class GspResourcesGrailsPlugin {
             if (springConfig.containsBean('grailsResourceLocator')) {
                 grailsResourceLocator = ref('grailsResourceLocator')
             }
+            gspResourcePageRenderer = ref('gspResourcePageRenderer')
             gspResourceLocator = ref('gspResourceLocator')
             grailsApplication = ref('grailsApplication')
         }

@@ -44,9 +44,6 @@ class GspResourceMeta extends ResourceMeta {
                 processedFile.write(compiledText, "UTF-8")
                 processedFile.setLastModified(gsp.file.lastModified())
                 
-                // Update this resource
-                this.actualUrl = this.sourceUrl
-                
                 if (log.isDebugEnabled()) {
                     log.debug "Compiled GSP - From: ${gsp.file} To: ${processedFile}"
                 }

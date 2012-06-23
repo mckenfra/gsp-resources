@@ -1,5 +1,8 @@
 package org.grails.plugin.resource.gsp
 
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.logging.LogFactory;
 import org.grails.plugin.resource.ResourceMeta;
@@ -70,9 +73,15 @@ import org.grails.plugin.resource.ResourceProcessorBatch;
 class GspResourceProcessor extends ResourceProcessor {
     def log = LogFactory.getLog(this.class)
     
-    // Injected - for stripping off GSP filename suffix
+    /**
+     * Injected - for finding the underlying GSP file
+     */
     GspResourceLocator gspResourceLocator
-
+    /**
+     * Injected - for rendering the GSP
+     */
+    GspResourcePageRenderer gspResourcePageRenderer
+    
     // We only want to block the first reload
     protected boolean firstReloadAllDone = false 
     
@@ -278,4 +287,170 @@ class GspResourceProcessor extends ResourceProcessor {
         type = type in ['html','htm','xhtml','xml','csv'] ? 'js' : type
         return type
     }
+    
+    /**
+     * Special logic to handle the case where debugging is enabled
+     * but the request is for a GSP-rendered resource.
+     * <p>
+     * Ordinarily, in debug mode all resources are served directly from
+     * the file system, without any processing. But for GSP resources,
+     * we DO need to do some processing, because the rendered GSP file
+     * is not located within the app itself, but in a temporary directory on
+     * the file system. We have to explicitly write the rendered GSP file
+     * contents to the response.
+     * <p>
+     * So we override this method in order to tell the resources plugin
+     * NOT to use debug mode for GSP resources.
+     */
+    @Override
+    public boolean isDebugMode(ServletRequest request) {
+        boolean isDebug = super.isDebugMode(request)
+        if (isDebug) {
+            
+            // Check if a GSP resource is being requested
+            boolean isGspResource
+            
+            // Shortcut - we've already checked the request before
+            def debugGsp = request.getAttribute('resources.debug.gsp')
+            if (debugGsp != null) {
+                isGspResource = debugGsp
+                
+            // Not previously checked this request to see if is GSP - so check now
+            } else {
+                String uri = ResourceProcessor.removeQueryParams(extractURI(request, true))
+                isGspResource = isGeneratedFromGsp(uri)
+                if (log.debugEnabled) {
+                    log.debug "${isGspResource ? 'GSP' : 'NON-GSP'}: ${request.requestURI}"
+                }
+                request.setAttribute('resources.debug.gsp', isGspResource)
+            }
+            
+            // Only allow debug mode if not a GSP resource
+            isDebug = !isGspResource
+        }
+        return isDebug
+    }
+    
+    /**
+     * Special logic to handle the case where debugging is enabled
+     * but the request is for a GSP-rendered resource.
+     * <p>
+     * Ordinarily, in debug mode all resources are served directly from
+     * the file system, without any processing. But for GSP resources,
+     * we DO need to do some processing, because the rendered GSP file
+     * is not located within the app itself, but in a temporary directory on
+     * the file system. We have to explicitly write the rendered GSP file
+     * contents to the response.
+     * <p>
+     * So we override this method in order to serve the rendered file,
+     * but ONLY in debug mode. In non-debug mode, the resources plugin
+     * handles everything as normal.
+     */
+    @Override
+    public boolean processLegacyResource(request, response) {
+        def debugGsp = request.getAttribute('resources.debug.gsp')
+        if (debugGsp) {
+            // Find the ResourceMeta for the request, or create it
+            String uri = ResourceProcessor.removeQueryParams(extractURI(request, true))
+            def inf
+            try {
+                inf = getResourceMetaForURI(uri, false)
+            } catch (FileNotFoundException fnfe) {
+                response.sendError(404, fnfe.message)
+                return true
+            }
+            
+            serveResource(inf, request, response)
+            return true
+        } else {
+            return super.processLegacyResource(request, response)
+        }
+    }
+    
+    /**
+     * Reads the resource from the file system, and writes it to the response.
+     * 
+     * @param inf The resource to read
+     * @param request The servlet request
+     * @param response The servlet response to which the resource contents will be written
+     */
+    protected void serveResource(ResourceMeta inf, ServletRequest request, ServletResponse response) {
+        // If we have a file, go for it
+        if (inf?.exists()) {
+            if (log.debugEnabled) {
+                log.debug "Serving resource ${request.requestURI}"
+            }
+            def data = inf.newInputStream()
+            try {
+                // Now set up the response
+                response.contentType = inf.contentType
+                response.setContentLength(inf.contentLength)
+                response.setDateHeader('Last-Modified', inf.originalLastMod)
+                response.outputStream << data
+            } finally {
+                data?.close()
+            }
+        } else {
+            response.sendError(404)
+        }
+    }
+    
+    /**
+     * Delegates the specified GSP resource to a synthetic resource that does
+     * the actual rendering. 
+     * 
+     * @param resource The resource representing the GSP URI
+     * @param gsp The map containing the GSP file details
+     */
+    protected void prepareGspResource(ResourceMeta resource, Map gsp) {
+        if (!resource || !gsp) {
+            throw new NullPointerException("Missing arguments! Resource: ${resource} GSP: ${gsp}")
+        }
+
+        // Generate the url of the compiled resource
+        resource.actualUrl = gspResourceLocator.generateCompiledFilenameFromOriginal(resource.originalUrl)
+
+        // Even in debug mode, we want to see the rendered resource not the original GSP
+        resource.originalUrl = resource.actualUrl
+        
+        // Set the rendered by tag attribute
+        if (!resource.attributes) resource.attributes = [:]
+        resource.attributes.'generated.from.gsp' = true
+
+        // Set the type tag attribute
+        if (!resource.tagAttributes) resource.tagAttributes = [:]
+        resource.tagAttributes.type = getResourceTypeFromUri(resource.actualUrl)
+
+        // Now create the synthetic resource that this resource is going to delegate to
+        def gspResource = findSyntheticResourceById(resource.actualUrl)
+        if (! gspResource) {
+            // Creates a new resource and empty file
+            gspResource = newSyntheticResource(resource.actualUrl, GspResourceMeta)
+            gspResource.id = resource.actualUrl
+            gspResource.contentType = resource.contentType
+            gspResource.disposition = resource.disposition
+            gspResource.gsp = gsp
+            gspResource.attributes = resource.attributes
+            gspResource.tagAttributes = resource.tagAttributes
+            gspResource.gspResourceLocator = gspResourceLocator
+            gspResource.gspResourcePageRenderer = gspResourcePageRenderer
+            if (log.debugEnabled) {
+                log.debug "Created synthetic GSP resource: ${resource.actualUrl}"
+            }
+        } else {
+            if (log.debugEnabled) {
+                log.debug "Synthetic GSP resource already exists: ${resource.actualUrl}"
+            }
+        }
+        
+        // Delegate
+        resource.delegateTo(gspResource)
+    }
+    
+    /**
+     * Returns true if the specified URI is for a GSP-generated resource.
+     */
+    public boolean isGeneratedFromGsp(String uri) {
+        return findResourceForURI(uri)?.attributes?.'generated.from.gsp'
+    }    
 }
