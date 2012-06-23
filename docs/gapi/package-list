@@ -1,4 +1,4 @@
 DefaultPackage
 gsp.resources
-org.grails.plugin.resource.gsp
-org.grails.plugin.resource.gsp.test
+org.grails.plugin.gspresources
+org.grails.plugin.gspresources.test
