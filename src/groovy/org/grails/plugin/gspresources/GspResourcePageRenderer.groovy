@@ -13,8 +13,8 @@ import org.codehaus.groovy.grails.web.pages.GroovyPagesTemplateEngine
 import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes;
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
 
-import org.grails.plugin.resource.gsp.servlet.BackgroundRequest
-import org.grails.plugin.resource.gsp.servlet.BackgroundResponse
+import org.grails.plugin.gspresources.servlet.BackgroundRequest
+import org.grails.plugin.gspresources.servlet.BackgroundResponse
 
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware

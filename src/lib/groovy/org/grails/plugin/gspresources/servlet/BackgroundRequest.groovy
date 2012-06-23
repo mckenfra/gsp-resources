@@ -1,4 +1,4 @@
-package org.grails.plugin.resource.gsp.servlet
+package org.grails.plugin.gspresources.servlet
 
 import java.io.IOException;
 import java.security.Principal
