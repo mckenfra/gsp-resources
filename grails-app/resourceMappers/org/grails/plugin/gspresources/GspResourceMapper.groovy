@@ -58,8 +58,8 @@ class GspResourceMapper {
         
         // Check if GSP
         Map gsp = gspResourceLocator.findGsp(resource.sourceUrl)
-        if (gsp) {
-            grailsResourceProcessor.prepareGspResource(resource, gsp)
+        if (gsp?.resource) {
+            grailsResourceProcessor.addSyntheticGspResource(resource, gsp.resource)
         } else {
             if (log.debugEnabled) {
                 log.debug "Not a GSP: ${resource.sourceUrl}"

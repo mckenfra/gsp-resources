@@ -7,6 +7,7 @@ import org.apache.commons.logging.LogFactory
 
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 import org.codehaus.groovy.grails.web.pages.discovery.GrailsConventionGroovyPageLocator
+import org.codehaus.groovy.grails.web.pages.discovery.GroovyPageScriptSource;
 import org.codehaus.groovy.grails.web.pages.discovery.GroovyPageStaticResourceLocator;
 import org.codehaus.groovy.grails.web.pages.FastStringWriter
 import org.codehaus.groovy.grails.web.pages.GroovyPagesTemplateEngine
@@ -18,6 +19,7 @@ import org.grails.plugin.gspresources.servlet.BackgroundResponse
 
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
+import org.springframework.core.io.Resource;
 import org.springframework.web.context.ServletContextAware
 import org.springframework.web.context.request.RequestContextHolder
 
@@ -49,10 +51,21 @@ class GspResourcePageRenderer implements ApplicationContextAware, ServletContext
     // Passed in constructor
     protected GroovyPagesTemplateEngine templateEngine
     
-    // Injected
+    /**
+     * Injected - for finding a view or template
+     */
     GrailsConventionGroovyPageLocator groovyPageLocator
+    /**
+     * Injected - for finding a static resource
+     */
     GroovyPageStaticResourceLocator grailsResourceLocator
+    /**
+     * Injected - required for rendering
+     */
     ApplicationContext applicationContext
+    /**
+     * Injected - required for rendering
+     */
     ServletContext servletContext
 
     GspResourcePageRenderer(GroovyPagesTemplateEngine templateEngine) {
@@ -62,12 +75,11 @@ class GspResourcePageRenderer implements ApplicationContextAware, ServletContext
     /**
      * Renders a page and returns the contents
      *
-     * @param args The named arguments
-     *
-     * @arg view The view to render. Must be an absolute view path since the controller name is unknown.
-     * @arg template The template to render. Must be an absolute template path since the controller name is unknown.
-     * @arg resource The resource to render. Must be an absolute template path since the controller name is unknown.
-     * @arg model The model to use for rendering
+     * @param args.view The URI of the view to render. Must be an absolute view path since the controller name is unknown.
+     * @param args.template The URI of the template to render. Must be an absolute template path since the controller name is unknown.
+     * @param args.resource The URI of the resource to render. Must be an absolute template path since the controller name is unknown.
+     * @param args.source The resource to render - either a {@link org.codehaus.groovy.grails.web.pages.discovery.GroovyPageScriptSource} or a {@link org.springframework.core.io.Resource}
+     * @param args.model The model to use for rendering
      *
      * @return The resulting string contents
      */
@@ -80,13 +92,12 @@ class GspResourcePageRenderer implements ApplicationContextAware, ServletContext
     /**
      * Renders a page and returns the contents
      *
-     * @param args The named arguments
+     * @param args.view The URI of the view to render. Must be an absolute view path since the controller name is unknown.
+     * @param args.template The URI of the template to render. Must be an absolute template path since the controller name is unknown.
+     * @param args.resource The URI of the resource to render. Must be an absolute template path since the controller name is unknown.
+     * @param args.source The resource to render - either a {@link org.codehaus.groovy.grails.web.pages.discovery.GroovyPageScriptSource} or a {@link org.springframework.core.io.Resource}
+     * @param args.model The model to use for rendering
      * @param writer The target writer
-     *
-     * @arg view The view to render. Must be an absolute view path since the controller name is unknown.
-     * @arg template The template to render. Must be an absolute template path since the controller name is unknown.
-     * @arg resource The resource to render. Must be an absolute template path since the controller name is unknown.
-     * @arg model The model to use for rendering
      *
      * @return The resulting string contents
      */
@@ -96,13 +107,12 @@ class GspResourcePageRenderer implements ApplicationContextAware, ServletContext
     /**
      * Renders a page and returns the contents
      *
-     * @param args The named arguments
+     * @param args.view The URI of the view to render. Must be an absolute view path since the controller name is unknown.
+     * @param args.template The URI of the template to render. Must be an absolute template path since the controller name is unknown.
+     * @param args.resource The URI of the resource to render. Must be an absolute template path since the controller name is unknown.
+     * @param args.source The resource to render - either a {@link org.codehaus.groovy.grails.web.pages.discovery.GroovyPageScriptSource} or a {@link org.springframework.core.io.Resource}
+     * @param args.model The model to use for rendering
      * @param stream The target stream
-     *
-     * @arg view The view to render. Must be an absolute view path since the controller name is unknown.
-     * @arg template The template to render. Must be an absolute template path since the controller name is unknown.
-     * @arg resource The resource to render. Must be an absolute template path since the controller name is unknown.
-     * @arg model The model to use for rendering
      *
      * @return The resulting string contents
      */
@@ -115,13 +125,12 @@ class GspResourcePageRenderer implements ApplicationContextAware, ServletContext
      * Internal method - renders a page and returns the contents. The public
      * methods call this method.
      * 
-     * @param args The named arguments
+     * @param args.view The URI of the view to render. Must be an absolute view path since the controller name is unknown.
+     * @param args.template The URI of the template to render. Must be an absolute template path since the controller name is unknown.
+     * @param args.resource The URI of the resource to render. Must be an absolute template path since the controller name is unknown.
+     * @param args.source The resource to render - either a {@link org.codehaus.groovy.grails.web.pages.discovery.GroovyPageScriptSource} or a {@link org.springframework.core.io.Resource}
+     * @param args.model The model to use for rendering
      * @param writer The target writer
-     *
-     * @arg view The view to render. Must be an absolute view path since the controller name is unknown.
-     * @arg template The template to render. Must be an absolute template path since the controller name is unknown.
-     * @arg resource The resource to render. Must be an absolute template path since the controller name is unknown.
-     * @arg model The model to use for rendering
      *
      * @return The resulting string contents
      */
@@ -135,6 +144,9 @@ class GspResourcePageRenderer implements ApplicationContextAware, ServletContext
         }
         else if (args.resource) {
             source = grailsResourceLocator.findResourceForURI(args.resource.toString())
+        }
+        else if (args.source && (args.source instanceof GroovyPageScriptSource || args.source instanceof Resource)) {
+            source = args.source
         }
         if (source == null) {
             return
