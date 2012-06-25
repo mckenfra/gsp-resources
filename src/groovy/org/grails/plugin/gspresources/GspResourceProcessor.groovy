@@ -254,10 +254,14 @@ class GspResourceProcessor extends ResourceProcessor {
             def bareUri = removeQueryParams(uri)
             if (gspResourceLocator.isGsp(bareUri)) {
                 def targetUri = gspResourceLocator.generateCompiledFilenameFromOriginal(bareUri)
-                result = super.getDefaultSettingsForURI(targetUri)
+                
+                // Hack so that any GSP-rendered file is permitted by the resources plugin
+                result = super.getDefaultSettingsForURI(targetUri) ?: [
+                    disposition:'head', type:'js'
+                ]
                 
                 // Set type attribute in module definition if not explicitly configured
-                if (result && !(result.attrs?.type)) {
+                if (!result?.attrs?.type) {
                     def type = getResourceTypeFromUri(targetUri)
                     if (type) {
                         if (result.attrs) {
@@ -400,9 +404,14 @@ class GspResourceProcessor extends ResourceProcessor {
             response.sendError(404, fnfe.message)
         }
         
-        def resource = inf.attributes?.'gsp.generated.resource'
-        if (resource) {
-            serveResource(resource, request, response)
+        GspResourceMeta gspResource = findGspResource(inf)
+        if (gspResource) {
+            serveResource(request, response,
+                gspResource.renderedFile,
+                gspResource.renderedContentType,
+                gspResource.renderedContentLength,
+                gspResource.renderedLastModified
+            )
         } else {
             response.sendError(404)
         }
@@ -411,24 +420,24 @@ class GspResourceProcessor extends ResourceProcessor {
     /**
      * Reads the resource from the file system, and writes it to the response.
      * 
-     * @param resource.file The file to server
-     * @param resource.contentType The content type of the resource
-     * @param resource.contentLength The content length of the resource
-     * @param resource.lastModified The lastModified of the resource
      * @param request The servlet request
      * @param response The servlet response to which the resource contents will be written
+     * @param file The file to serve
+     * @param contentType The content type of the resource
+     * @param contentLength The content length of the resource; defaults to file's contentLength
+     * @param lastModified The lastModified of the resource; defaults to file's lastModified
      */
-    protected void serveResource(Map resource, ServletRequest request, ServletResponse response) {
-        if (resource?.file?.exists()) {
+    protected void serveResource(ServletRequest request, ServletResponse response, File file,
+        String contentType = null, Integer contentLength = null, Long lastModified = null) {
+        if (file?.exists()) {
             if (log.debugEnabled) {
                 log.debug "Serving resource ${request.requestURI}"
             }
-            def data = resource.file.newInputStream()
+            def data = file.newInputStream()
             try {
-                // Now set up the response
-                response.contentType = resource.contentType
-                response.setContentLength(resource.contentLength)
-                response.setDateHeader('Last-Modified', resource.lastModified)
+                response.contentType = contentType ?: getMimeType(file.toString())
+                response.setContentLength(contentLength ?: file.size().toInteger())
+                response.setDateHeader('Last-Modified', lastModified ?: file.lastModified())
                 response.outputStream << data
             } finally {
                 data?.close()
@@ -449,29 +458,35 @@ class GspResourceProcessor extends ResourceProcessor {
         if (!resource || !gsp) {
             throw new NullPointerException("Missing arguments! Resource: ${resource} GSP: ${gsp}")
         }
-
+        
         // Generate the url of the compiled resource
         resource.actualUrl = gspResourceLocator.generateCompiledFilenameFromOriginal(resource.originalUrl)
 
-        // Even in debug mode, we want to see the rendered resource not the original GSP
-        resource.originalUrl = resource.actualUrl
-        
-        // Set the type tag attribute
-        if (!resource.tagAttributes) resource.tagAttributes = [:]
-        resource.tagAttributes.type = getResourceTypeFromUri(resource.actualUrl)
+        // Force debug mode to link to the rendered resource, not the original GSP
+//        resource.originalUrl = resource.sourceUrl = resource.actualUrl
 
+        // Set content type
+        resource.contentType = getMimeType(resource.actualUrl)
+        
+        // Set the rendered attribute
+        if (resource.attributes == null) resource.attributes = [:]
+        resource.attributes.'gsp.rendered' = resource.actualUrl
+
+        // Set the type tag attribute
+        if (resource.tagAttributes == null) resource.tagAttributes = [:]
+        resource.tagAttributes.type = getResourceTypeFromUri(resource.actualUrl)
+        
         // Now create the synthetic resource that this resource is going to delegate to
-        def gspResource = findSyntheticResourceById(resource.actualUrl)
-        if (! gspResource) {
+        def rendered = findSyntheticResourceById(resource.actualUrl)
+        if (! rendered) {
             // Creates a new resource and empty file
-            gspResource = newSyntheticResource(resource.actualUrl, GspResourceMeta)
-            gspResource.id = resource.actualUrl
-            gspResource.contentType = resource.contentType
-            gspResource.disposition = resource.disposition
-            gspResource.gsp = gsp
-            gspResource.attributes = resource.attributes
-            gspResource.tagAttributes = resource.tagAttributes
-            gspResource.gspResourcePageRenderer = gspResourcePageRenderer
+            rendered = newSyntheticResource(resource.actualUrl, GspResourceMeta)
+            rendered.id = resource.actualUrl
+            rendered.gsp = gsp
+            rendered.contentType = resource.contentType
+            rendered.disposition = resource.disposition
+            rendered.attributes = resource.attributes
+            rendered.tagAttributes = resource.tagAttributes
             if (log.debugEnabled) {
                 log.debug "Created synthetic GSP resource: ${resource.actualUrl}"
             }
@@ -482,31 +497,32 @@ class GspResourceProcessor extends ResourceProcessor {
         }
         
         // Delegate
-        resource.delegateTo(gspResource)
-    }
-    
-    /**
-     * Stores the details about the rendered GSP in the resource's attributes map.
-     * <p>
-     * These details will be used when serving the resource in debug mode, since
-     * only the raw rendered GSP should be served, without any additional processing.
-     * 
-     * @param resource The synthetic GSP resource to update
-     */
-    protected void finaliseSyntheticGspResource(ResourceMeta resource) {
-        if (!resource.attributes) resource.attributes = [:]
-        resource.attributes.'gsp.generated.resource' = [
-            file:(resource.processedFile?new File(resource.processedFile.toString()):null),
-            contentType:resource.contentType,
-            contentLength:resource.contentLength,
-            lastModified:resource.processedFile?.lastModified()
-        ]
+        resource.delegateTo(rendered)
     }
     
     /**
      * Returns true if the specified URI is for a GSP-generated resource.
      */
     public boolean isGeneratedFromGsp(String uri) {
-        return findResourceForURI(uri)?.attributes?.'gsp.generated.resource'
-    }    
+        return findResourceForURI(uri)?.attributes?.'gsp.rendered'
+    }
+    
+    /**
+     * Returns the GspResourceMeta for the rendered output of
+     * the specified GSP resource - if it exists.
+     */
+    public GspResourceMeta findGspResource(ResourceMeta resource) {
+        if (resource instanceof GspResourceMeta) return resource
+        else return findResourceForURI(resource.attributes.'gsp.rendered')
+    }
+    
+    /**
+     * Performs the rendering of the specified GSP, and returns the output.
+     * 
+     * @param gsp The GSP resource itself
+     * @return Output of rendering as String
+     */
+    protected String renderGsp(Resource gsp) {
+        return gsp ? gspResourcePageRenderer.render([source:gsp]) : ""
+    }
 }
