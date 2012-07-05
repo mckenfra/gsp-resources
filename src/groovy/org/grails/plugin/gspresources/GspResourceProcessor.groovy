@@ -474,7 +474,7 @@ class GspResourceProcessor extends ResourceProcessor {
 
         // Set the type tag attribute
         if (resource.tagAttributes == null) resource.tagAttributes = [:]
-        resource.tagAttributes.type = getResourceTypeFromUri(resource.actualUrl)
+        resource.tagAttributes.type = resource.tagAttributes.type ?: getResourceTypeFromUri(resource.actualUrl)
         
         // Now create the synthetic resource that this resource is going to delegate to
         def rendered = findSyntheticResourceById(resource.actualUrl)
