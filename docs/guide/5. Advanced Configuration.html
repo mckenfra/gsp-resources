@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>5 Advanced Configuration 0.4.1</title>
+    <title>5 Advanced Configuration 0.4.2-SNAPSHOT</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -83,66 +83,17 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> Stefan Kendall, Francis McKenzie</p>
 
-                    <p><strong>Version:</strong> 0.4.1</p>
+                    <p><strong>Version:</strong> 0.4.2-SNAPSHOT</p>
 
                     
                 </div>
 
-                
-                <div id="table-of-content">
-                    <h2>Table of Contents</h2>
-                    
-                    <div class="toc-item" style="margin-left:0px"><a href="#5.1%20Delayed%20Processing"><strong>5.1</strong><span>Delayed Processing</span></a>
-                    </div>
-                    
-                    <div class="toc-item" style="margin-left:0px"><a href="#5.2%20Simple%20HTML%20Cache"><strong>5.2</strong><span>Simple HTML Cache</span></a>
-                    </div>
-                    
-                </div>
                 
 
                 
 
 <h1 id="5. Advanced Configuration">5 Advanced Configuration</h1>
 
-
-
-<h2 id="5.1 Delayed Processing">5.1 Delayed Processing</h2>
-One limitation of the resources plugin in connection with GSP compilation
-is that the processing of static resources takes place during server startup.<p class="paragraph"/>In fact, the processing could take place before a lot of the core grails
-infrastructure has been loaded. If your GSP resources contain <code>&#60;g:include /&#62;</code>
-tags, for example, it is possible the grails support for loading other groovy
-pages will not yet have been loaded when the resources plugin starts processing
-your GSP. This will result in errors!<p class="paragraph"/>To get around this, the gsp-resources plugin provides an additional configuration
-option, for delaying the start of resources processing during server startup. The
-following configuration option should be placed in <code>grails-app/conf/Config.groovy</code>:<p class="paragraph"/><div class="code"><pre>grails.resources.processing.startup = <span class="java&#45;quote">"delayed"</span></pre></div><p class="paragraph"/>This will delay resources processing until the bootstrap phase - by which point
-all required plugins and artefacts should be fully loaded.<p class="paragraph"/>For even finer control, you can disable resources processing during server startup
-entirely, with the following configuration:<p class="paragraph"/><div class="code"><pre>grails.resources.processing.startup = <span class="java&#45;keyword">false</span></pre></div><p class="paragraph"/>You can then manually trigger the initial resources processing by adding the
-following code to your project's <code>Bootstrap.groovy</code>:<p class="paragraph"/><div class="code"><pre>class BootStrap &#123;<p class="paragraph"/>    // Automatically injected
-    def grailsResourceProcessor<p class="paragraph"/>    def init = &#123; servletContext &#45;&#62;<p class="paragraph"/>        // Do whatever preparation you need first
-        // E.g. create some objects that your GSPs will need
-        // . . .
-        // . . .<p class="paragraph"/>        // Finally, start resources processing
-        grailsResourceProcessor.start()
-    &#125;<p class="paragraph"/>    def destroy = &#123;
-    &#125;<p class="paragraph"/>&#125;</pre></div><p class="paragraph"/><blockquote class="note">
-If no <code>grails.resources.processing.startup</code> configuration option is found in
-<code>Config.groovy</code>, or an invalid value is used, then the resources
-plugin defaults to its normal startup.
-</blockquote>
-
-
-
-<h2 id="5.2 Simple HTML Cache">5.2 Simple HTML Cache</h2>
-One potential use of the <code>gsp-resources</code> plugin is to cache the HTML output of some 
-controller action as a static <code>.html</code> file. Note that the <code>.html</code> file will be created
-on server startup, and will not change after that.<p class="paragraph"/><h4>Example</h4><p class="paragraph"/>We are going to cache the output of <code>http://localhost:8080/myapp/about/me</code><p class="paragraph"/><h4>1. Create a new directory under <code>web-app</code></h4><p class="paragraph"/>We will use <code>web-app/cache</code> in this example, but any directory name is fine.<p class="paragraph"/><h4>2. Configure resources plugin to include new directory</h4><p class="paragraph"/>Make the following change to <code>grails-app/conf/Config.groovy</code><p class="paragraph"/><div class="code"><pre>// Note we have added '/cache/&#42;' to the existing list
-grails.resources.adhoc.patterns = &#91;'/images/&#42;', '/css/&#42;', '/js/&#42;', '/plugins/&#42;', '/cache/&#42;'&#93;</pre></div><p class="paragraph"/><h4>3. Create GSP to cache controller output</h4><p class="paragraph"/>Add the below content to <code>web-app/cache/aboutme.html.gsp</code><p class="paragraph"/><div class="code"><pre>&#60;g:include controller=<span class="java&#45;quote">"about"</span> action=<span class="java&#45;quote">"me"</span>/&#62;</pre></div><p class="paragraph"/><h4>4. Add new GSP to resources plugin configuration</h4><p class="paragraph"/>Make the following change to <code>grails-app/conf/ApplicationResources.groovy</code><p class="paragraph"/><div class="code"><pre>modules = &#123;
-    aboutme &#123;
-        resource url:'/cache/aboutme.html.gsp'
-    &#125;
-&#125;</pre></div><p class="paragraph"/><h4>5. Check results</h4><p class="paragraph"/>You should now be able to view the cached file at
-<code>http://localhost:8080/myapp/cache/aboutme.html</code><p class="paragraph"/><strong class="bold">Note</strong>: don't forget to restart your server first.
 
 
                 <div style="clear:both;margin-top:15px;"></div>
