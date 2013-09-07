@@ -2,6 +2,7 @@ package org.grails.plugin.gspresources
 
 import org.apache.commons.logging.LogFactory
 import org.grails.plugin.resource.ResourceMeta
+import org.grails.plugin.resource.ResourceModule
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
@@ -20,6 +21,12 @@ class GspResourceMeta extends ResourceMeta {
      * Set when this resource meta is created by {@link GspResourceMapper}
      */
     Resource gsp
+    /**
+     * The resource module of the original GSP resource
+     * <p>
+     * Set when this resource meta is created by {@link GspResourceMapper}
+     */
+    ResourceModule gspModule
     /**
      * The rendered output file.
      * <p>
@@ -94,6 +101,12 @@ class GspResourceMeta extends ResourceMeta {
             renderedContentLength = contentLength
             renderedContentType = contentType
             renderedLastModified = processedFile.lastModified()
+            
+            // Hack to ensure rendered file is included in bundle at same position
+            // as declared in resources configuration.
+            // If we don't do this, the rendered file is always included at the end
+            // of the bundle, after all non-GSP-type resources.
+            if (gspModule) module = gspModule
             
         // This GspResourceMeta has not been set up properly
         } else {

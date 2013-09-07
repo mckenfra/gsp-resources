@@ -10,6 +10,8 @@ import org.grails.plugin.resource.ResourceProcessor
 import org.grails.plugin.resource.ResourceProcessorBatch;
 import org.springframework.core.io.Resource;
 
+import org.grails.plugin.resource.BundleResourceMapper;
+
 /**
  * Overrides the resources plugin's ResourceProcessor, to provide additional
  * features required for GSP processing
@@ -231,6 +233,28 @@ class GspResourceProcessor extends ResourceProcessor {
         // Ordering not found - just pass through for normal processing
         } else {
             super.prepareResourceBatch(batch)
+        }
+        
+        // Hack to ensure changes to GSPs trigger refresh of bundle
+        def delegatesOfRenderedGsps = []
+        batch.each { r ->
+            if (r.delegating && r.delegate in GspResourceMeta &&
+                r.delegate.delegating && !(r.delegate.delegate in delegatesOfRenderedGsps)) {
+                delegatesOfRenderedGsps << r.delegate.delegate
+            }
+        }
+        for (r in delegatesOfRenderedGsps) {
+            if (log.debugEnabled) {
+                log.debug "Preparing synthetic resource: ${r.sourceUrl}"
+            }
+            
+            r.reset()
+            resourceInfo.evict(r.sourceUrl)
+            
+            prepareSingleDeclaredResource(r) {
+                def u = r.sourceUrl
+                allResourcesByOriginalSourceURI[u] = r
+            }
         }
     }
     
@@ -487,6 +511,20 @@ class GspResourceProcessor extends ResourceProcessor {
             rendered.disposition = resource.disposition
             rendered.attributes = resource.attributes
             rendered.tagAttributes = resource.tagAttributes
+            rendered.bundle = resource.bundle
+            if (!rendered.bundle && resource.module.resources.size() > 1 && resource.tagAttributes.type in resource.module.bundleTypes) {
+                def bundlePrefix = resource.module.defaultBundle ?: "bundle_${resource.module.name}"
+                rendered.bundle = "${bundlePrefix}_${resource.disposition}"
+            }
+            
+            // Hack to ensure rendered file is included in bundle at same position
+            // as declared in resources configuration.
+            // If we don't do this, the rendered file is always included at the end
+            // of the bundle, after all non-GSP-type resources.
+            def bundleMapper = resourceMappers.find { it.name == 'bundle' }
+            bundleMapper?.invokeIfNotExcluded(rendered)
+            rendered.gspModule = resource.module
+            
             if (log.debugEnabled) {
                 log.debug "Created synthetic GSP resource: ${resource.actualUrl}"
             }

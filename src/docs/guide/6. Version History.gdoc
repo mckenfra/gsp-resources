@@ -1,5 +1,6 @@
 {table}
  *Version* | *Date* | *Description*
+ 0.4.2 | Sep 7, 2013 | *Enhancements/Fixes*:\\- Allow rendered GSPs in bundles\\- Fix broken dependencies due to grails 2.3
  0.4.1 | Jul 6, 2012 | Bugfix: preserve @type@ from @Resources.groovy@ configuration
  0.4 | Jun 25, 2012 | *Enhancements/Fixes*:\\- Support all types of GSP output (e.g. HTML) without special configuration\\- Support @grails.resources.debug@ config setting\\- Generated files now saved in @~/.grails@, like other resources plugins
  0.31 | Mar 23, 2012 | Made compatible with Servlet 2.5 (already 3.0)
