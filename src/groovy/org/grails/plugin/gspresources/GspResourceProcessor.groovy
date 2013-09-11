@@ -190,60 +190,152 @@ class GspResourceProcessor extends ResourceProcessor {
     /**
      * The resources plugin for some reason does not apply the module dependency
      * ordering to the resources batch when reloading modules.
-     * <p>
-     * This method first reorders the resource batch into the correct ordering,
-     * then calls the superclass method.
+     * Therefore we have to explicitly help it to get the correct ordering.
      * <p>
      * Note that ordering is important to GSP resources, because we have to
      * ensure the resources the GSP depends on have been processed before the
-     * GSP itself! 
+     * GSP itself!
+     * 
+     * @param batch All resources that have been changed.
+     * @return A new batch ordered correctly.
      */
-    @Override
-    void prepareResourceBatch(ResourceProcessorBatch batch) {
+    ResourceProcessorBatch orderResourceBatch(ResourceProcessorBatch batch) {
         def orderedNames = super.modulesInDependencyOrder
         
         // Ensure we have module ordering already
-        if (orderedNames) {
+        if (!orderedNames) return batch
             
-            // Log
-            if (log.isDebugEnabled()) {
-                log.debug "Reordering resources according to module dependency ordering: ${orderedNames}"
-            }
-            
-            // Create new resources set with correct ordering
-            LinkedHashSet<ResourceMeta> orderedResources = new LinkedHashSet<ResourceMeta>()
-            orderedNames.each { name ->
-                batch.each { r ->
-                    if (r.module.name == name) {
-                        orderedResources << r
-                    }
-                }
-            }
-            
-            // Just in case - add any resources that haven't yet been added
-            batch.each { orderedResources << it }
-            
-            // Copy ordered resources to new batch
-            ResourceProcessorBatch orderedBatch = new ResourceProcessorBatch()
-            orderedBatch.add(orderedResources as List)
-            
-            // Call superclass method with ordered batch
-            super.prepareResourceBatch(orderedBatch)
-            
-        // Ordering not found - just pass through for normal processing
-        } else {
-            super.prepareResourceBatch(batch)
+        // Log
+        if (log.isDebugEnabled()) {
+            log.debug "Reordering resources according to module dependency ordering: ${orderedNames}"
         }
         
-        // Hack to ensure changes to GSPs trigger refresh of bundle
-        def delegatesOfRenderedGsps = []
-        batch.each { r ->
-            if (r.delegating && r.delegate in GspResourceMeta &&
-                r.delegate.delegating && !(r.delegate.delegate in delegatesOfRenderedGsps)) {
-                delegatesOfRenderedGsps << r.delegate.delegate
+        // Create new resources set with correct ordering
+        LinkedHashSet<ResourceMeta> orderedResources = new LinkedHashSet<ResourceMeta>()
+        orderedNames.each { name ->
+            batch.each { r ->
+                if (r.module.name == name) {
+                    orderedResources << r
+                }
             }
         }
-        for (r in delegatesOfRenderedGsps) {
+        
+        // Just in case - add any resources that haven't yet been added
+        batch.each { orderedResources << it }
+        
+        // Copy ordered resources to new batch
+        ResourceProcessorBatch orderedBatch = new ResourceProcessorBatch()
+        orderedBatch.add(orderedResources as List)
+            
+        return orderedBatch
+    }
+    
+    /**
+     * Processing of synthetic resources is an issue for this plugin,
+     * as it creates a synthetic resource for every original GSP
+     * resource. The synthetic resource does the actual rendering
+     * of the GSP and creation of the target file.
+     * <p>
+     * The problem is that the resources plugin also creates synthetic
+     * resources that do the bundling. If the bundling resource is
+     * processed before a GSP synthetic resource in that module
+     * being bundled, then a null pointer exception is thrown, because
+     * the GSP output file does not exist yet.
+     * <p>
+     * So in a nutshell, this method just puts all GSP synthetic
+     * resources at the front of the specified list of synthetics.
+     * That way, they will be processed first.
+     * 
+     * @param synthetics All synthetics that have changed.
+     * @return A new list ordered correctly.
+     */
+    List orderSyntheticResources(List synthetics) {
+        return synthetics?.sort { a,b ->
+            a in GspResourceMeta ?
+            (b in GspResourceMeta ? 0 : -1) :
+            (b in GspResourceMeta ? 1 : 0);
+        }
+    }
+    
+    /**
+     * Override this key method in the resources plugin, and modify
+     * its behaviour as follows:
+     * <p>
+     * <ul>
+     * 
+     * <li>First, reorder the resources in the batch to ensure dependency
+     * ordering, which is critical to GSP resources.
+     * See {@link #orderResourceBatch(ResourceProcessorBatch)}</li>
+     * 
+     * <li>Run the same processing of resources as would
+     * have been done by the superclass method, but with one
+     * critical change: before processing any synthetic resources,
+     * ensure the ordering is correct.
+     * See {@link #orderSyntheticResources(List)}</li>
+     * 
+     * <li>Finally, force reloading of bundles containing GSP resources.
+     * See {@link #didPrepareResourceBatch(ResourceProcessorBatch)}</li>
+     * 
+     * </ul>
+     */
+    @Override
+    void prepareResourceBatch(ResourceProcessorBatch batch) {
+        
+        // Added for completeness - currently does nothing
+        willPrepareResourceBatch(batch)
+        
+        // Ordering is essential for GSPs (but not for static resources)
+        batch = orderResourceBatch(batch)
+        
+        // ********************************************************
+        // WHAT FOLLOWS IS A STRAIGHT COPY-AND-PASTE OF THIS METHOD
+        // IN 'resources' PLUGIN v1.2, BUT WITH A
+        // ONE-LINE ADDITION.
+        //
+        // UNFORTUNATELY, DUE TO THE WAY THE METHOD IS CODED,
+        // THERE IS NO ALTERNATIVE.
+        //
+        // OUR KEY PROBLEM IS WE NEED TO INFLUENCE THE ORDERING
+        // OF PROCESSING OF THE SYNTHETIC RESOURCES, TO ENSURE
+        // THE GSP-SYNTHETICS ARE PROCESSED BEFORE THE
+        // BUNDLING-SYNTHETICS
+        // ********************************************************
+        if (log.debugEnabled) {
+            log.debug "Preparing resource batch:"
+            batch.each { r ->
+                log.debug "Batch includes resource: ${r.sourceUrl}"
+            }
+        }
+        
+        def affectedSynthetics = []
+        batch.each { r ->
+            r.reset()
+            resourceInfo.evict(r.sourceUrl)
+
+            prepareSingleDeclaredResource(r) {
+                def u = r.sourceUrl
+                allResourcesByOriginalSourceURI[u] = r
+            }
+
+            if (r.delegating) {
+                if (!(affectedSynthetics.find { it == r.delegate })) {
+                    affectedSynthetics << r.delegate
+                }
+            }
+        }
+
+        // Synthetic resources are only known after processing declared resources
+        if (log.debugEnabled) {
+            log.debug "Preparing synthetic resources"
+        }
+        
+        // ********************************************************
+        // NOTE: THIS IS THE KEY CHANGE
+        affectedSynthetics = orderSyntheticResources(affectedSynthetics)
+        // ********************************************************
+        
+        // The rest is the same
+        for (r in affectedSynthetics) {
             if (log.debugEnabled) {
                 log.debug "Preparing synthetic resource: ${r.sourceUrl}"
             }
@@ -255,6 +347,62 @@ class GspResourceProcessor extends ResourceProcessor {
                 def u = r.sourceUrl
                 allResourcesByOriginalSourceURI[u] = r
             }
+        }
+        // ********************************************************
+        // END OF COPY-AND-PASTE
+        // ********************************************************
+
+        // Ensure changes to GSPs trigger a refresh of containing bundle
+        didPrepareResourceBatch(batch)
+    }
+    
+    /**
+     * Added for completeness - currently does nothing
+     * 
+     * @param batch All resources that have been changed.
+     */
+    void willPrepareResourceBatch(ResourceProcessorBatch batch) {
+        // Do nothing
+    }
+    
+    /**
+     * Forces processing of any bundles that contain GSP resources
+     * in the specified batch.
+     * <p>
+     * Note this takes place at the very end of the processing cycle,
+     * after all other resources have been processed.
+     * 
+     * @param batch All resources that have changed.
+     */
+    void didPrepareResourceBatch(ResourceProcessorBatch batch) {
+        // Get list of GSP and non-GSP synthetics
+        def gspSynthetics = []
+        def otherSynthetics = []
+        batch.each { r ->
+            if (r.delegating) {
+                if (r.delegate in GspResourceMeta) {
+                    gspSynthetics << r.delegate
+                } else {
+                    otherSynthetics << r.delegate
+                }
+            }
+        }
+        
+        // Find any bundles that contain changed-GSPs, but have not yet
+        // been processed.
+        def bundlingSyntheticsNeedingProcessing = gspSynthetics.findAll {
+            it.delegating && !(it.delegate in otherSynthetics)
+        }.collect { it.delegate }.unique()
+        
+        // Process those bundle synthetics
+        for (r in bundlingSyntheticsNeedingProcessing) {
+            if (log.debugEnabled) {
+                log.debug "Preparing synthetic resource, because GSP was modified: ${r.sourceUrl}"
+            }
+            
+            r.reset()
+            resourceInfo.evict(r.sourceUrl)
+            prepareSingleDeclaredResource(r)
         }
     }
     
@@ -516,6 +664,7 @@ class GspResourceProcessor extends ResourceProcessor {
                 def bundlePrefix = resource.module.defaultBundle ?: "bundle_${resource.module.name}"
                 rendered.bundle = "${bundlePrefix}_${resource.disposition}"
             }
+            rendered.originalModule = resource.module
             
             // Hack to ensure rendered file is included in bundle at same position
             // as declared in resources configuration.
@@ -523,16 +672,25 @@ class GspResourceProcessor extends ResourceProcessor {
             // of the bundle, after all non-GSP-type resources.
             def bundleMapper = resourceMappers.find { it.name == 'bundle' }
             bundleMapper?.invokeIfNotExcluded(rendered)
-            rendered.gspModule = resource.module
-            
+
             if (log.debugEnabled) {
                 log.debug "Created synthetic GSP resource: ${resource.actualUrl}"
             }
+            
+        // Synthetic resource already created
         } else {
             if (log.debugEnabled) {
                 log.debug "Synthetic GSP resource already exists: ${resource.actualUrl}"
             }
         }
+        
+        // When the rendered synthetic resource is eventually processed, it
+        // changes its module to be that of the original GSP resource - this
+        // ensures that it gets bundled in the correct order.
+        // So we always need to reset the module during this earlier phase,
+        // to ensure the rendered module is not processed too early
+        // (i.e. incorrectly before other static resources)
+        rendered.module = getModule(SYNTHETIC_MODULE)
         
         // Delegate
         resource.delegateTo(rendered)

@@ -26,7 +26,7 @@ class GspResourceMeta extends ResourceMeta {
      * <p>
      * Set when this resource meta is created by {@link GspResourceMapper}
      */
-    ResourceModule gspModule
+    ResourceModule originalModule
     /**
      * The rendered output file.
      * <p>
@@ -106,7 +106,7 @@ class GspResourceMeta extends ResourceMeta {
             // as declared in resources configuration.
             // If we don't do this, the rendered file is always included at the end
             // of the bundle, after all non-GSP-type resources.
-            if (gspModule) module = gspModule
+            if (originalModule) module = originalModule
             
         // This GspResourceMeta has not been set up properly
         } else {
