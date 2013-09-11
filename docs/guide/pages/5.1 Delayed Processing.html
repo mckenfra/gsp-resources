@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>5.1 Delayed Processing 0.4.1</title>
+    <title>5.1 Delayed Processing 0.4.2-SNAPSHOT</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -83,7 +83,7 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> Stefan Kendall, Francis McKenzie</p>
 
-                    <p><strong>Version:</strong> 0.4.1</p>
+                    <p><strong>Version:</strong> 0.4.2-SNAPSHOT</p>
 
                     
                 </div>
@@ -93,12 +93,12 @@ function addJsClass() {
                 
 
 <h2 id="5.1 Delayed Processing">5.1 Delayed Processing</h2>
-One limitation of the resources plugin in connection with GSP compilation
+One limitation of the <code>resources</code> plugin in connection with GSP compilation
 is that the processing of static resources takes place during server startup.<p class="paragraph"/>In fact, the processing could take place before a lot of the core grails
 infrastructure has been loaded. If your GSP resources contain <code>&#60;g:include /&#62;</code>
 tags, for example, it is possible the grails support for loading other groovy
-pages will not yet have been loaded when the resources plugin starts processing
-your GSP. This will result in errors!<p class="paragraph"/>To get around this, the gsp-resources plugin provides an additional configuration
+pages will not yet have been loaded when the <code>resources</code> plugin starts processing
+your GSP. This will result in errors!<p class="paragraph"/>To get around this, the <code>gsp-resources</code> plugin provides an additional configuration
 option, for delaying the start of resources processing during server startup. The
 following configuration option should be placed in <code>grails-app/conf/Config.groovy</code>:<p class="paragraph"/><div class="code"><pre>grails.resources.processing.startup = <span class="java&#45;quote">"delayed"</span></pre></div><p class="paragraph"/>This will delay resources processing until the bootstrap phase - by which point
 all required plugins and artefacts should be fully loaded.<p class="paragraph"/>For even finer control, you can disable resources processing during server startup
