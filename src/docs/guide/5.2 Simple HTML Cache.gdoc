@@ -1,0 +1,49 @@
+One potential use of the @gsp-resources@ plugin is to cache the HTML output
+of some controller action as a static @.html@ file. Note that the @.html@ file
+will be created on server startup, and will not change after that.
+
+h4. Example
+
+We are going to cache the output of @http://localhost:8080/myapp/about/me@
+
+h4. 1. Create a new directory under @web-app@
+
+We will use @web-app/cache@ in this example, but any directory name is fine.
+
+h4. 2. Configure resources plugin to include new directory
+
+Make the following change to @grails-app/conf/Config.groovy@
+
+{code}
+// Note we have added '/cache/*' to the existing list
+grails.resources.adhoc.patterns = ['/images/*', '/css/*', '/js/*', '/plugins/*', '/cache/*']
+{code}
+
+h4. 3. Create GSP to cache controller output
+
+Add the below content to @web-app/cache/aboutme.html.gsp@
+
+{code}
+<g:include controller="about" action="me"/>
+{code}
+
+h4. 4. Add new GSP to @resources@ plugin configuration
+
+Make the following change to @grails-app/conf/ApplicationResources.groovy@
+
+{code}
+modules = {
+    aboutme {
+        resource url:'/cache/aboutme.html.gsp'
+    }
+}
+{code}
+
+h4. 5. Check results
+
+You should now be able to view the cached file at
+@http://localhost:8080/myapp/cache/aboutme.html@
+
+{note}
+Don't forget to restart your server first!
+{note} 

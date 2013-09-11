@@ -1,0 +1,58 @@
+One limitation of the @resources@ plugin in connection with GSP compilation
+is that the processing of static resources takes place during server startup.
+
+In fact, the processing could take place before a lot of the core grails
+infrastructure has been loaded. If your GSP resources contain @<g:include />@
+tags, for example, it is possible the grails support for loading other groovy
+pages will not yet have been loaded when the @resources@ plugin starts processing
+your GSP. This will result in errors!
+
+To get around this, the @gsp-resources@ plugin provides an additional configuration
+option, for delaying the start of resources processing during server startup. The
+following configuration option should be placed in @grails-app/conf/Config.groovy@:
+
+{code}
+grails.resources.processing.startup = "delayed"
+{code}
+
+This will delay resources processing until the bootstrap phase - by which point
+all required plugins and artefacts should be fully loaded.
+
+For even finer control, you can disable resources processing during server startup
+entirely, with the following configuration:
+
+{code}
+grails.resources.processing.startup = false
+{code}
+
+You can then manually trigger the initial resources processing by adding the
+following code to your project's @Bootstrap.groovy@:
+
+{code}
+class BootStrap {
+
+    // Automatically injected
+    def grailsResourceProcessor
+
+    def init = { servletContext ->
+
+        // Do whatever preparation you need first
+        // E.g. create some objects that your GSPs will need
+        // . . .
+        // . . .
+
+        // Finally, start resources processing
+        grailsResourceProcessor.start()
+    }
+
+    def destroy = {
+    }
+
+}
+{code}
+
+{note}
+If no @grails.resources.processing.startup@ configuration option is found in
+@Config.groovy@, or an invalid value is used, then the resources
+plugin defaults to its normal startup.
+{note}
