@@ -1,8 +1,11 @@
 package org.grails.plugin.gspresources.servlet
 
+import java.io.PrintWriter;
 import java.util.Enumeration;
+import java.util.List;
 
 import javax.servlet.ServletContext
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpSession
 import javax.servlet.http.HttpSessionContext;
 
@@ -10,58 +13,75 @@ import org.apache.commons.collections.iterators.IteratorEnumeration
 
 /**
  * A session object used during the GSP rendering pipeline for
- * render operations outside a web request
+ * render operations outside a web request.
+ * <p>
+ * Configured by passing in a map of request properties during instantiation.
+ * <p>
+ * Can be used in either a servlet 2.5 or servlet 3.0 container.
  * 
  * @author Francis McKenzie
  */
 public class BackgroundSession implements HttpSession {
-    // Internal
-    protected ServletContext _servletContext
-    protected Map _attributes = [:]
     
-    public BackgroundSession(ServletContext servletContext) {
-        this._servletContext = servletContext
+    /**
+     * Instantiate class - dynamically adds any required servlet 3.0
+     * methods while still allowing class to be loaded in a servlet 2.5
+     * container.
+     * 
+     * @param servletContext The servlet context of the session
+     * @param responseArgs Optional properties to set on session using methods of same name
+     * @return A 'faked' session
+     */
+    public static HttpSession createInstance(ServletContext servletContext, Map sessionArgs = null) {
+        return new BackgroundSession(servletContext, sessionArgs)
     }
-    public long getCreationTime() { 0 }
+
+    Map<String,Object> attributeMap
+    long creationTime
+    String id
+    ServletContext servletContext
     
-    public String getId() { "NOT-A-REAL-SESSION" }
+    protected BackgroundSession(ServletContext servletContext, Map sessionArgs) {
+        attributeMap = BackgroundUtils.createAttributeMap(sessionArgs?.attributes)
+        creationTime = System.currentTimeMillis()
+        id = sessionArgs?.id ?: 'NOT-A-REAL-SESSION'
+        servletContext = servletContext
+    }
     
-    public long getLastAccessedTime() { 0 }
+    long getLastAccessedTime() { 0 }
     
-    public int getMaxInactiveInterval() { 0 }
+    int getMaxInactiveInterval() { 0 }
     
-    public ServletContext getServletContext() { this._servletContext }
+    void invalidate() { attributeMap.clear() }
     
-    public void invalidate() { this._attributes.clear() }
+    boolean isNew() { false }
     
-    public boolean isNew() { false }
+    void setMaxInactiveInterval(int arg0) { /** No-op **/ }
     
-    public void setMaxInactiveInterval(int arg0) { /** No-op **/ }
+    Enumeration<String> getAttributeNames() { new IteratorEnumeration((attributeMap?.keySet()?:[]).iterator()) }
     
-    public Enumeration<String> getAttributeNames() { new IteratorEnumeration(this._attributes.keySet().iterator()) }
+    Object getAttribute(String name) { attributeMap?.get(name) }
     
-    public Object getAttribute(String name) { this._attributes.get(name) }
+    void setAttribute(String name, Object value) { attributeMap?.put(name, value) }
     
-    public void setAttribute(String name, Object value) { this._attributes.put(name, value) }
-    
-    public void removeAttribute(String name) { this._attributes.remove(name) }
+    void removeAttribute(String name) { attributeMap.remove(name) }
     
     // DEPRECATED METHODS
     
     @SuppressWarnings("deprecation")
-    public HttpSessionContext getSessionContext() {
+    HttpSessionContext getSessionContext() {
         throw new UnsupportedOperationException("You cannot get session context in non-request rendering operations")
     }
     
     @SuppressWarnings("deprecation")
-    public String[] getValueNames() { this._attributes.keySet() as String[] }
+    String[] getValueNames() { (attributeMap?.keySet()?:[]) as String[] }
     
     @SuppressWarnings("deprecation")
-    public Object getValue(String name) { this._attributes.get(name) }
+    Object getValue(String name) { attributeMap?.get(name) }
     
     @SuppressWarnings("deprecation")
-    public void putValue(String name, Object value) { this._attributes.put(name, value) }
+    void putValue(String name, Object value) { attributeMap?.put(name, value) }
 
     @SuppressWarnings("deprecation")
-    public void removeValue(String name) { this._attributes.remove(name) }
+    void removeValue(String name) { attributeMap.remove(name) }
 }

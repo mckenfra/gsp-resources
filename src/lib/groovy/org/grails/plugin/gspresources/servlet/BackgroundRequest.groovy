@@ -1,6 +1,9 @@
 package org.grails.plugin.gspresources.servlet
 
 import java.io.IOException;
+import java.lang.reflect.InvocationHandler
+import java.lang.reflect.Method
+import java.lang.reflect.Proxy
 import java.security.Principal
 import java.util.Collection;
 import java.util.Enumeration;
@@ -16,178 +19,211 @@ import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
 import javax.servlet.http.HttpSession
 
-// Servlet 3.0
-//import javax.servlet.AsyncContext;
-//import javax.servlet.DispatcherType;
-//import javax.servlet.http.Part;
-// Servlet 3.0
-
 import org.apache.commons.collections.iterators.IteratorEnumeration
-import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes;
 
 /**
  * A request object used during the GSP rendering pipeline for
- * render operations outside a web request
+ * render operations outside a web request.
+ * <p>
+ * Configured by passing in a map of request properties during instantiation.
+ * <p>
+ * It conforms to servlet 2.5, so must be compiled using this version. However,
+ * it can then be deployed in either a servlet 2.5 or 3.0 container.
  * 
- * Based on grails.gsp.PageRenderer, with following improvements:
- * 
- * <li>The page context is correctly set in the mock request object. With the
- * original grails PageRenderer in Grails 2.0.1, this is currently missing.
- * Therefore any calls to resource(dir:'/') in a GSP may not render
- * the path correctly.<br/></li>
- * 
- * <li>Other request attributes (e.g. session, remoteHost, cookies) that
- * are generally required for GSP rendering are also supported.</li>
- * 
- * @author Graeme Rocher / Francis McKenzie
+ * @author Francis McKenzie
  */
 public class BackgroundRequest implements HttpServletRequest {
-    // Internal
-    protected String _requestURI
-    protected String _contextPath
-    protected ServletContext _servletContext
-    protected Map _params
-    protected Map _attributes
-    protected Cookie[] _cookies
-    protected HttpSession _session
     
-    // Public fields
+    /**
+     * Instantiate class - dynamically adds any required servlet 3.0
+     * methods while still allowing class to be loaded in a servlet 2.5
+     * container.
+     * <p>
+     * 
+     * @param requestURI The URI of the request
+     * @param servletContext The servlet context of the request
+     * @param requestArgs Optional properties to set on request using methods of same name, including:
+     * @param attributes A map of attributes to add to the request
+     * @param cookies A map of cookies to add to the request
+     * @param headers A map of headers to add to the request
+     * @param params A map of params to add to the request
+     * @return A 'faked' request
+     */
+    public static HttpServletRequest createInstance(
+        Object requestURI,
+        Object servletContext,
+        Map requestArgs = null)
+    {
+        BackgroundRequest request = new BackgroundRequest(requestURI, servletContext, requestArgs)
+        return BackgroundRequest.createProxyInstance(request)
+    }
+    
+    protected static HttpServletRequest createProxyInstance(final BackgroundRequest request) {
+        return (HttpServletRequest) Proxy.newProxyInstance(HttpServletRequest.classLoader, [HttpServletRequest] as Class[], new InvocationHandler() {
+            Object invoke(proxy, Method method, Object[] args) {
+                String methodName = method.name
+
+                // Servlet 3.0 methods
+                if (methodName == 'getDispatcherType') {
+                    return Enum.valueOf(Class.forName('javax.servlet.DispatcherType'), 'REQUEST')
+                } else if (methodName == 'startAsync') {
+                    throw new UnsupportedOperationException("You cannot get start async in non-request rendering operations")
+                } else if (methodName == 'getAsyncContext') {
+                    throw new UnsupportedOperationException("You cannot get get async context in non-request rendering operations")
+                } else if (methodName == 'getParts') {
+                    throw new UnsupportedOperationException("You cannot get get parts in non-request rendering operations")
+                } else if (methodName == 'getPart') {
+                    throw new UnsupportedOperationException("You cannot get get part in non-request rendering operations")
+                }
+                
+                // Other methods
+                return request.invokeMethod(methodName, args)
+            }
+        })
+    }
+    
+    Map<String,Object> attributeMap
+    String characterEncoding
+    String content
     String contentType
-    String characterEncoding = "UTF-8"
-
-    public BackgroundRequest(Object requestURI, Object servletContext, Object applicationContext, List<Cookie> cookies) {
-        this._requestURI = requestURI.toString()
-        this._servletContext = servletContext
-        this._contextPath = servletContext.contextPath
-        this._params = [:]
-        this._attributes = [:]
-        this._attributes.put(GrailsApplicationAttributes.APP_URI_ATTRIBUTE, servletContext.contextPath)
-        this._attributes.put('applicationContext', applicationContext)
-        this._cookies = cookies as Cookie[]
+    Cookie[] cookies
+    Map<String,String[]> headerMap
+    String localAddr
+    Locale locale
+    Enumeration<Locale> locales
+    String localName
+    int localPort
+    String method
+    Map<String,String[]> parameterMap
+    String pathInfo
+    String pathTranslated
+    String protocol
+    String queryString
+    String remoteAddr
+    String remoteHost
+    int remotePort
+    String remoteUser
+    String requestedSessionId
+    String requestURI
+    String scheme
+    String serverName
+    int serverPort
+    ServletContext servletContext
+    String servletPath
+    HttpSession session
+    Principal userPrincipal
+    
+    protected BackgroundRequest(Object requestURI, Object servletContext, Map requestArgs) {
+        attributeMap = BackgroundUtils.createAttributeMap(requestArgs?.attributes)
+        characterEncoding = requestArgs?.characterEncoding ?: 'UTF-8'
+        content = requestArgs?.content
+        contentType = requestArgs?.contentType
+        cookies = BackgroundUtils.createCookies(requestArgs?.cookies)
+        headerMap = BackgroundUtils.createParameterMap(requestArgs?.headers)
+        localAddr = requestArgs?.localAddr ?: '127.0.0.1'
+        def loc = requestArgs?.locale
+        locale = loc in Locale ? loc : (loc ? new Locale(loc) : Locale.getDefault())
+        localName = requestArgs?.localName ?: 'localhost'
+        localPort = requestArgs?.localPort ?: 80
+        method = requestArgs?.method ?: 'GET'
+        parameterMap = BackgroundUtils.createParameterMap(requestArgs?.params)
+        pathInfo = requestArgs?.pathInfo ?: ''
+        pathTranslated = requestArgs?.pathTranslated ?: ''
+        protocol = requestArgs?.protocol ?: ''
+        queryString = requestArgs?.queryString ?: (requestURI in URL ? requestURI.query : '')
+        remoteAddr = requestArgs?.remoteAddr ?: localAddr
+        remoteHost = requestArgs?.remoteHost ?: localName
+        remotePort = requestArgs?.remotePort ?: localPort
+        remoteUser = requestArgs?.remoteUser
+        requestedSessionId = requestArgs?.requestedSessionId
+        def uri = requestURI ?: requestArgs?.requestURI
+        this.requestURI = uri in URL ? uri.URI : uri
+        scheme = requestArgs?.scheme
+        serverName = requestArgs?.serverName ?: localName
+        serverPort = requestArgs?.serverPort ?: localPort
+        this.servletContext = servletContext
+        servletPath = requestArgs?.servletPath ?: '/'
+        session = requestArgs?.session in HttpSession ? requestArgs.session : null
+        userPrincipal = requestArgs?.userPrincipal in Principal ? requestArgs.userPrincipal : null
     }
     
-    // SERVLET 2.x
-    String getAuthType() { null }
-
-    public Cookie[] getCookies() { this._cookies }
-
-    long getDateHeader(String name) { -1L }
-
-    String getHeader(String name) { null }
-
-    Enumeration<String> getHeaders(String name) { new IteratorEnumeration([].iterator()) }
-
-    Enumeration<String> getHeaderNames() { new IteratorEnumeration([].iterator()) }
-
-    int getIntHeader(String name) { -1 }
-
-    String getMethod() { "GET" }
-
-    String getPathInfo() { "" }
-
-    String getPathTranslated() { "" }
-
-    String getContextPath() { this._contextPath }
-
-    String getQueryString() { "" }
-
-    String getRemoteUser() { null }
-
-    boolean isUserInRole(String role) { false }
-
-    Principal getUserPrincipal() { null }
-
-    String getRequestedSessionId() { this._session?.id }
-
-    public String getRequestURI() { this._requestURI }
+    boolean isAsyncStarted() { false }
     
-    StringBuffer getRequestURL() { new StringBuffer(getRequestURI()) }
-
-    String getServletPath() { "/" }
-
-    public HttpSession getSession(boolean create) {
-        _session || !create ? _session : (_session = new BackgroundSession(_servletContext))
+    boolean isAsyncSupported() { false }
+    
+    String getAuthType() { '' }
+    
+    int getContentLength() { content ? content.length() : 0 }
+    
+    String getContextPath() { servletContext?.contextPath ?: '' }
+     
+    ServletInputStream getInputStream() {
+        final InputStream input = new ByteArrayInputStream((content?:'').getBytes(contentType))
+        return new ServletInputStream() {
+            int read() { input.read() }
+        }
     }
-
-    public HttpSession getSession() { this._session }
-
+    
+    Enumeration<Locale> getLocales() { new IteratorEnumeration(Locale.getAvailableLocales().iterator()) }
+    
+    BufferedReader getReader() { new BufferedReader(new StringReader(content?:'')) }
+    
     boolean isRequestedSessionIdValid() { true }
-
+    
     boolean isRequestedSessionIdFromCookie() { false }
 
     boolean isRequestedSessionIdFromURL() { true }
 
     boolean isRequestedSessionIdFromUrl() { true }
-
-    Object getAttribute(String name) { this._attributes.get(name) }
-
-    Enumeration<String> getAttributeNames() { new IteratorEnumeration(this._attributes.keySet().iterator()) }
-
-    int getContentLength() { 0 }
-
-    ServletInputStream getInputStream() {
-        throw new UnsupportedOperationException("You cannot read the input stream in non-request rendering operations")
-    }
-
-    String getParameter(String name) { this._params.get(name) }
-
-    Enumeration<String> getParameterNames() { new IteratorEnumeration(this._params.keySet().iterator()) }
-
-    String[] getParameterValues(String name) { this._params.values() as String[] }
-
-    Map getParameterMap() { this._params }
-
-    String getProtocol() {
-        throw new UnsupportedOperationException("You cannot read the protocol in non-request rendering operations")
-    }
-
-    String getScheme() {
-        throw new UnsupportedOperationException("You cannot read the scheme in non-request rendering operations")
-    }
-
-    String getServerName() {
-        throw new UnsupportedOperationException("You cannot read server name in non-request rendering operations")
-    }
-
-    int getServerPort() {
-        throw new UnsupportedOperationException("You cannot read the server port in non-request rendering operations")
-    }
-
-    BufferedReader getReader() {
-        throw new UnsupportedOperationException("You cannot read input in non-request rendering operations")
-    }
-
-    String getRemoteAddr() { "127.0.0.1" }
-
-    String getRemoteHost() { "localhost" }
-
-    void setAttribute(String name, Object o) { this._attributes.put(name, o) }
-
-    void removeAttribute(String name) { this._attributes.remove(name) }
-
-    Locale getLocale() { Locale.getDefault() }
-
-    Enumeration<Locale> getLocales() { new IteratorEnumeration(Locale.getAvailableLocales().iterator()) }
-
-    boolean isSecure() { false }
-
-    RequestDispatcher getRequestDispatcher(String path) { this._servletContext.getRequestDispatcher(path) }
-
-    String getRealPath(String path) { this._requestURI }
-
-    int getRemotePort() { 80 }
-
-    String getLocalName() { "localhost" }
-
-    String getLocalAddr() { "127.0.0.1" }
-
-    int getLocalPort() { 80 }
-    // SERVLET 2.x
     
-    // SERVLET 3.0
-    public boolean isAsyncStarted() { false }
+    StringBuffer getRequestURL() { new StringBuffer(requestURI?:'') }
+    
+    boolean isSecure() { false }
+    
+    long getDateHeader(String name) {
+        if (! (headerMap?.get(name)) ) return -1
+        try { Long.valueOf(headerMap.get(name)[0]) }
+        catch(e) { throw new IllegalArgumentException(name) }
+    }
 
-    public boolean isAsyncSupported() { false }
+    String getHeader(String name) { headerMap?.get(name) ? headerMap.get(name)[0] : null }
+
+    Enumeration<String> getHeaders(String name) {
+        def values = headerMap?.get(name) ?: []
+        new IteratorEnumeration(values.iterator())
+    }
+
+    Enumeration<String> getHeaderNames() { new IteratorEnumeration((headerMap?.keySet()?:[]).iterator()) }
+
+    int getIntHeader(String name) {
+        if (! (headerMap?.get(name)) ) return -1
+        try { Integer.valueOf(headerMap.get(name)[0]) }
+        catch(e) { throw new NumberFormatException(name) }
+    }
+
+    boolean isUserInRole(String role) { false }
+
+    String getRealPath(String path) { path }
+    
+    public HttpSession getSession(boolean create) {
+        session || !create || !servletContext ? session : (session = BackgroundSession.createInstance(servletContext))
+    }
+
+    Object getAttribute(String name) { attributeMap ? attributeMap.get(name) : null }
+
+    Enumeration<String> getAttributeNames() { new IteratorEnumeration((attributeMap?.keySet()?:[]).iterator()) }
+
+    void setAttribute(String name, Object o) { attributeMap.put(name, o) }
+
+    void removeAttribute(String name) { attributeMap?.remove(name) }
+
+    String getParameter(String name) { parameterMap?.get(name) ? parameterMap.get(name)[0] : null }
+
+    Enumeration<String> getParameterNames() { new IteratorEnumeration((parameterMap?.keySet()?:[]).iterator()) }
+
+    String[] getParameterValues(String name) { parameterMap ? parameterMap.get(name) : [] as String[] }
+
+    RequestDispatcher getRequestDispatcher(String path) { servletContext?.getRequestDispatcher(path) }
 
     public boolean authenticate(HttpServletResponse response)
             throws IOException, ServletException { false }
@@ -195,32 +231,4 @@ public class BackgroundRequest implements HttpServletRequest {
     public void login(String username, String password) throws ServletException { /** No-op **/ }
 
     public void logout() throws ServletException { /** No-op **/ }
-
-    public ServletContext getServletContext() { this._servletContext }
-
-    def getDispatcherType() { Enum.valueOf(Class.forName('javax.servlet.DispatcherType'), 'REQUEST') }
-
-    def startAsync() {
-        throw new UnsupportedOperationException("You cannot get start async in non-request rendering operations")
-    }
-
-    def startAsync(ServletRequest servletRequest,
-            ServletResponse servletResponse) {
-        throw new UnsupportedOperationException("You cannot get start async in non-request rendering operations")
-    }
-
-    def getAsyncContext() {
-        throw new UnsupportedOperationException("You cannot get get async context in non-request rendering operations")
-    }
-
-    def getParts() throws IOException,
-            IllegalStateException, ServletException {
-        throw new UnsupportedOperationException("You cannot get get parts in non-request rendering operations")
-    }
-
-    def getPart(String name) throws IOException,
-            IllegalStateException, ServletException {
-        throw new UnsupportedOperationException("You cannot get get part in non-request rendering operations")
-    }
-    // SERVLET 3.0
 }

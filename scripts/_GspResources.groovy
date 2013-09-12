@@ -25,6 +25,8 @@ target(compile: "compile the library source") {
         include(name: "**/servlet-api-*.jar")
         include(name: "**/commons-collections/**")
         include(name: "**/org.springframework/**")
+        include(name: "**/org.slf4j/**")
+        include(name: "**/org.codehaus.groovy/**")
     }
     def grailsDistJars = Ant.fileset(dir: "${grailsDistDir}") {
         include(name: "**/grails-core-*.jar")

@@ -8,34 +8,68 @@ import javax.servlet.http.HttpServletResponse
 
 /**
  * A response object used during the GSP rendering pipeline for
- * render operations outside a web request
+ * render operations outside a web request.
+ * <p>
+ * Configured by passing in a map of response properties during instantiation.
+ * <p>
+ * Can be used in either a servlet 2.5 or servlet 3.0 container.
+ * 
+ * @author Francis McKenzie
  */
 public class BackgroundResponse implements HttpServletResponse {
-    // Internal
-    protected PrintWriter _writer
-    protected List<Cookie> _cookies
-    protected boolean _isCommitted
-    protected Map _headers = [:]
     
-    // Public fields
-    String characterEncoding = "UTF-8"
-    String contentType
-    Locale locale = Locale.getDefault()
-    int bufferSize = 0
-    int contentLength = 0
-    int status = 0
-    
-    public BackgroundResponse(PrintWriter writer, List<Cookie> cookies) {
-        this._writer = writer
-        this._cookies = cookies
+    /**
+     * Instantiate class - dynamically adds any required servlet 3.0
+     * methods while still allowing class to be loaded in a servlet 2.5
+     * container.
+     * 
+     * @param writer The writer for the output
+     * @param responseArgs Optional properties to set on response using methods of same name, including:
+     * @param cookies A map of cookies to add to the response
+     * @param headers A map of headers to add to the response
+     * @return A 'faked' response
+     */
+    public static HttpServletResponse createInstance(Writer writer, Map responseArgs = null) {
+        return new BackgroundResponse(writer, responseArgs)
     }
 
-    // Servlet 2.x
-    public PrintWriter getWriter() { this._writer }
+    int bufferSize
+    String characterEncoding
+    boolean committed
+    int contentLength
+    String contentType
+    List<Cookie> cookies
+    Map<String,List<String>> headerMap
+    Locale locale
+    int status
+    PrintWriter writer
     
-    void addCookie(Cookie cookie) { this._cookies.add(cookie) }
+    protected BackgroundResponse(Writer writer, Map responseArgs) {
+        bufferSize = 0
+        characterEncoding = responseArgs?.characterEncoding ?: 'UTF-8'
+        committed = false
+        contentLength = responseArgs?.contentLength ?: 0
+        cookies = BackgroundUtils.createCookies(responseArgs?.cookies) as List<Cookie>
+        headerMap = BackgroundUtils.createParameterMap(responseArgs?.headers)
+        def loc = responseArgs?.locale
+        locale = loc in Locale ? loc : (loc ? new Locale(loc) : Locale.getDefault())
+        status = responseArgs?.status ?: 200
+        this.writer = writer instanceof PrintWriter ? writer : new PrintWriter(writer) 
+    }
 
-    boolean containsHeader(String name) { return this._headers.containsKey(name) }
+    void addCookie(Cookie cookie) { cookies.add(cookie) }
+    
+    void setContentLength(int contentLength) {
+        this.contentLength = contentLength
+        setHeader('Content-Length', contentLength)
+    }
+    
+    void setContentType(String contentType) {
+        this.contentType = contentType
+        setHeader('Content-Type', contentType)
+    }
+
+    boolean containsHeader(String name) { return headers.containsKey(name) }
 
     String encodeURL(String url) { url }
 
@@ -46,59 +80,59 @@ public class BackgroundResponse implements HttpServletResponse {
     String encodeRedirectUrl(String url) { url }
 
     void sendError(int sc, String msg) {
-        this.status = sc
-        this._writer.print msg
+        status = sc
+        writer?.print msg
     }
 
-    void sendError(int sc) { this.status = sc }
+    void sendError(int sc) { status = sc }
 
-    void sendRedirect(String location) { this.status = 302 }
+    void sendRedirect(String location) { status = 302 }
 
-    void setHeader(String name, String value) { this._headers.put(name, [value] as List<String>) }
+    void setHeader(String name, String value) {
+        if (!headerMap || !name) return
+        if (value == null) headerMap.remove(name)
+        else headerMap.put(name, [value] as List<String>)
+    }
 
     void addHeader(String name, String value) {
-        def values = this._headers.get(name)
+        if (!headerMap) return
+        List<String> values = headerMap.get(name)
         if (!values) {
             values = [] as List<String>
-            this._headers.put(name, values)
+            headerMap.put(name, values)
         }
         values.add(value)
     }
 
-    void setDateHeader(String name, long date) { setHeader(name, ""+date) }
+    void setDateHeader(String name, long date) { setHeader(name, "${date}") }
 
-    void addDateHeader(String name, long date) { addHeader(name, ""+date) }
+    void addDateHeader(String name, long date) { addHeader(name, "${date}") }
 
-    void setIntHeader(String name, int value) { setHeader(name, ""+value) }
+    void setIntHeader(String name, int value) { setHeader(name, "${value}") }
 
-    void addIntHeader(String name, int value) { addHeader(name, ""+value) }
+    void addIntHeader(String name, int value) { addHeader(name, "${value}") }
 
     void setStatus(int sc, String sm) {
-        this.status = sc
-        this._writer.print(sm)
+        status = sc
+        writer?.print(sm)
     }
 
     ServletOutputStream getOutputStream() {
         throw new UnsupportedOperationException("You cannot use the OutputStream in non-request rendering operations. Use getWriter() instead")
     }
 
-    public boolean isCommitted() { this._isCommitted }
-
-    void flushBuffer() { this._isCommitted = true }
+    void flushBuffer() { committed = true }
 
     void resetBuffer() { /** No-op **/ }
 
     void reset() {
-        this.status = 0
-        this._headers.clear()
+        status = 0
+        headerMap.clear()
     }
-    // Servlet 2.x
+
+    Collection<String> getHeaders(String name) { headerMap?.get(name) ?: [] }
     
-    // Servlet 3.0
-    public Collection<String> getHeaders(String name) { this._headers.get(name) ?: [] }
-    
-    public Collection<String> getHeaderNames() { this._headers.keySet() }
+    public Collection<String> getHeaderNames() { headerMap?.keySet() }
             
-    public String getHeader(String name) { this._headers.get(name)?.get(0) }
-    // Servlet 3.0
+    public String getHeader(String name) { headerMap.get(name) ? headerMap.get(name)[0] : null }
 }

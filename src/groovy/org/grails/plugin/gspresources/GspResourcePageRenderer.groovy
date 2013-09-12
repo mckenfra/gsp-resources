@@ -4,7 +4,6 @@ import javax.servlet.ServletContext
 import javax.servlet.http.Cookie
 
 import org.apache.commons.logging.LogFactory
-
 import org.codehaus.groovy.grails.commons.GrailsApplication;
 import org.codehaus.groovy.grails.web.pages.discovery.GrailsConventionGroovyPageLocator
 import org.codehaus.groovy.grails.web.pages.discovery.GroovyPageScriptSource;
@@ -13,10 +12,8 @@ import org.codehaus.groovy.grails.web.pages.FastStringWriter
 import org.codehaus.groovy.grails.web.pages.GroovyPagesTemplateEngine
 import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes;
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
-
 import org.grails.plugin.gspresources.servlet.BackgroundRequest
 import org.grails.plugin.gspresources.servlet.BackgroundResponse
-
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
 import org.springframework.core.io.Resource;
@@ -161,11 +158,10 @@ class GspResourcePageRenderer implements ApplicationContextAware, ServletContext
             
             // Create the HTTP request/response
             List<Cookie> cookies = (args.cookies?:[]) as List<Cookie>
-            def request = new BackgroundRequest(source.URI, servletContext, applicationContext, cookies)
-            def response = new BackgroundResponse(writer instanceof PrintWriter ? writer : new PrintWriter(writer), cookies)
-            if (args.attributes && args.attributes instanceof Map) {
-                args.attributes.each { k,v-> request.setAttribute(k, v) }
-            }
+            def request = BackgroundRequest.createInstance(source.URI, servletContext, args)
+            def response = BackgroundResponse.createInstance(writer, args)
+            request.setAttribute(GrailsApplicationAttributes.APP_URI_ATTRIBUTE, servletContext.contextPath)
+            request.setAttribute('applicationContext', applicationContext)
 
             // Create the grails web request
             def webRequest = new GrailsWebRequest(request, response, servletContext, applicationContext)
