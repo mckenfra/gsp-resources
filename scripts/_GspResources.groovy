@@ -22,10 +22,13 @@ target(compile: "compile the library source") {
     
     // Build classpath for compile for servlet 2.5
     def grailsLibJars = Ant.fileset(dir: "${grailsLibDir}") {
-        include(name: "**/*.jar")
+        include(name: "**/servlet-api-*.jar")
+        include(name: "**/commons-collections/**")
+        include(name: "**/org.springframework/**")
     }
     def grailsDistJars = Ant.fileset(dir: "${grailsDistDir}") {
-        include(name: "**/*.jar")
+        include(name: "**/grails-core-*.jar")
+        include(name: "**/grails-web-*.jar")
     }
 
     Ant.path(id: "servlet25") {

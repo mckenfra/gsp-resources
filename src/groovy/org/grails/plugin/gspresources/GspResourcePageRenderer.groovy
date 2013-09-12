@@ -158,11 +158,30 @@ class GspResourcePageRenderer implements ApplicationContextAware, ServletContext
             if (! servletContext.getAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT)) {
                 servletContext.setAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT, applicationContext)
             }
-            List<Cookie> cookies = []
-            def webRequest = new GrailsWebRequest(
-                new BackgroundRequest(source.URI, servletContext, applicationContext, cookies),
-                new BackgroundResponse(writer instanceof PrintWriter ? writer : new PrintWriter(writer), cookies),
-                servletContext, applicationContext)
+            
+            // Create the HTTP request/response
+            List<Cookie> cookies = (args.cookies?:[]) as List<Cookie>
+            def request = new BackgroundRequest(source.URI, servletContext, applicationContext, cookies)
+            def response = new BackgroundResponse(writer instanceof PrintWriter ? writer : new PrintWriter(writer), cookies)
+            if (args.attributes && args.attributes instanceof Map) {
+                args.attributes.each { k,v-> request.setAttribute(k, v) }
+            }
+
+            // Create the grails web request
+            def webRequest = new GrailsWebRequest(request, response, servletContext, applicationContext)
+            if (args.flash) {
+                webRequest.flashScope.putAll(args.flash)
+            } else {
+                webRequest.flashScope.clear()
+            }
+            if (args.controller) {
+                webRequest.setControllerName(args.controller)
+            }
+            if (args.action) {
+                webRequest.setActionName(args.action)
+            }
+            
+            // Process the grails web request
             RequestContextHolder.setRequestAttributes(webRequest)
             def template = templateEngine.createTemplate(source)
             if (template != null) {

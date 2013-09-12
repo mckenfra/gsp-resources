@@ -63,7 +63,6 @@ public class BackgroundRequest implements HttpServletRequest {
         this._attributes = [:]
         this._attributes.put(GrailsApplicationAttributes.APP_URI_ATTRIBUTE, servletContext.contextPath)
         this._attributes.put('applicationContext', applicationContext)
-        this._session = new BackgroundSession(servletContext)
         this._cookies = cookies as Cookie[]
     }
     
@@ -98,7 +97,7 @@ public class BackgroundRequest implements HttpServletRequest {
 
     Principal getUserPrincipal() { null }
 
-    String getRequestedSessionId() { this._session.id }
+    String getRequestedSessionId() { this._session?.id }
 
     public String getRequestURI() { this._requestURI }
     
@@ -106,7 +105,9 @@ public class BackgroundRequest implements HttpServletRequest {
 
     String getServletPath() { "/" }
 
-    public HttpSession getSession(boolean create) { this._session }
+    public HttpSession getSession(boolean create) {
+        _session || !create ? _session : (_session = new BackgroundSession(_servletContext))
+    }
 
     public HttpSession getSession() { this._session }
 
@@ -184,42 +185,42 @@ public class BackgroundRequest implements HttpServletRequest {
     // SERVLET 2.x
     
     // SERVLET 3.0
-//    public boolean isAsyncStarted() { false }
-//
-//    public boolean isAsyncSupported() { false }
-//
-//    public boolean authenticate(HttpServletResponse response)
-//            throws IOException, ServletException { false }
-//
-//    public void login(String username, String password) throws ServletException { /** No-op **/ }
-//
-//    public void logout() throws ServletException { /** No-op **/ }
-//
-//    public ServletContext getServletContext() { this._servletContext }
-//
-//    public javax.servlet.DispatcherType getDispatcherType() { javax.servlet.DispatcherType.REQUEST }
-//
-//    public javax.servlet.AsyncContext startAsync() {
-//        throw new UnsupportedOperationException("You cannot get start async in non-request rendering operations")
-//    }
-//
-//    public javax.servlet.AsyncContext startAsync(ServletRequest servletRequest,
-//            ServletResponse servletResponse) {
-//        throw new UnsupportedOperationException("You cannot get start async in non-request rendering operations")
-//    }
-//
-//    public javax.servlet.AsyncContext getAsyncContext() {
-//        throw new UnsupportedOperationException("You cannot get get async context in non-request rendering operations")
-//    }
-//
-//    public Collection<javax.servlet.http.Part> getParts() throws IOException,
-//            IllegalStateException, ServletException {
-//        throw new UnsupportedOperationException("You cannot get get parts in non-request rendering operations")
-//    }
-//
-//    public javax.servlet.http.Part getPart(String name) throws IOException,
-//            IllegalStateException, ServletException {
-//        throw new UnsupportedOperationException("You cannot get get part in non-request rendering operations")
-//    }
+    public boolean isAsyncStarted() { false }
+
+    public boolean isAsyncSupported() { false }
+
+    public boolean authenticate(HttpServletResponse response)
+            throws IOException, ServletException { false }
+
+    public void login(String username, String password) throws ServletException { /** No-op **/ }
+
+    public void logout() throws ServletException { /** No-op **/ }
+
+    public ServletContext getServletContext() { this._servletContext }
+
+    def getDispatcherType() { Enum.valueOf(Class.forName('javax.servlet.DispatcherType'), 'REQUEST') }
+
+    def startAsync() {
+        throw new UnsupportedOperationException("You cannot get start async in non-request rendering operations")
+    }
+
+    def startAsync(ServletRequest servletRequest,
+            ServletResponse servletResponse) {
+        throw new UnsupportedOperationException("You cannot get start async in non-request rendering operations")
+    }
+
+    def getAsyncContext() {
+        throw new UnsupportedOperationException("You cannot get get async context in non-request rendering operations")
+    }
+
+    def getParts() throws IOException,
+            IllegalStateException, ServletException {
+        throw new UnsupportedOperationException("You cannot get get parts in non-request rendering operations")
+    }
+
+    def getPart(String name) throws IOException,
+            IllegalStateException, ServletException {
+        throw new UnsupportedOperationException("You cannot get get part in non-request rendering operations")
+    }
     // SERVLET 3.0
 }
