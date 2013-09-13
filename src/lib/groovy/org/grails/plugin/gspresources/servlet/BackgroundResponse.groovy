@@ -1,7 +1,5 @@
 package org.grails.plugin.gspresources.servlet
 
-import java.util.Collection;
-
 import javax.servlet.ServletOutputStream
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletResponse
@@ -13,23 +11,23 @@ import javax.servlet.http.HttpServletResponse
  * Configured by passing in a map of response properties during instantiation.
  * <p>
  * Can be used in either a servlet 2.5 or servlet 3.0 container.
- * 
+ *
  * @author Francis McKenzie
  */
-public class BackgroundResponse implements HttpServletResponse {
-    
+class BackgroundResponse implements HttpServletResponse {
+
     /**
      * Instantiate class - dynamically adds any required servlet 3.0
      * methods while still allowing class to be loaded in a servlet 2.5
      * container.
-     * 
+     *
      * @param writer The writer for the output
      * @param responseArgs Optional properties to set on response using methods of same name, including:
      * @param cookies A map of cookies to add to the response
      * @param headers A map of headers to add to the response
      * @return A 'faked' response
      */
-    public static HttpServletResponse createInstance(Writer writer, Map responseArgs = null) {
+    static HttpServletResponse createInstance(Writer writer, Map responseArgs = null) {
         return new BackgroundResponse(writer, responseArgs)
     }
 
@@ -43,7 +41,7 @@ public class BackgroundResponse implements HttpServletResponse {
     Locale locale
     int status
     PrintWriter writer
-    
+
     protected BackgroundResponse(Writer writer, Map responseArgs) {
         bufferSize = 0
         characterEncoding = responseArgs?.characterEncoding ?: 'UTF-8'
@@ -54,16 +52,16 @@ public class BackgroundResponse implements HttpServletResponse {
         def loc = responseArgs?.locale
         locale = loc in Locale ? loc : (loc ? new Locale(loc) : Locale.getDefault())
         status = responseArgs?.status ?: 200
-        this.writer = writer instanceof PrintWriter ? writer : new PrintWriter(writer) 
+        this.writer = writer instanceof PrintWriter ? writer : new PrintWriter(writer)
     }
 
     void addCookie(Cookie cookie) { cookies.add(cookie) }
-    
+
     void setContentLength(int contentLength) {
         this.contentLength = contentLength
         setHeader('Content-Length', contentLength)
     }
-    
+
     void setContentType(String contentType) {
         this.contentType = contentType
         setHeader('Content-Type', contentType)
@@ -131,8 +129,8 @@ public class BackgroundResponse implements HttpServletResponse {
     }
 
     Collection<String> getHeaders(String name) { headerMap?.get(name) ?: [] }
-    
-    public Collection<String> getHeaderNames() { headerMap?.keySet() }
-            
-    public String getHeader(String name) { headerMap.get(name) ? headerMap.get(name)[0] : null }
+
+    Collection<String> getHeaderNames() { headerMap?.keySet() }
+
+    String getHeader(String name) { headerMap.get(name) ? headerMap.get(name)[0] : null }
 }

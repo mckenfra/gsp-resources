@@ -1,4 +1,5 @@
 package org.grails.plugin.gspresources.test
+
 class Constants {
-    public static int ONE = 1
+    public static final int ONE = 1
 }

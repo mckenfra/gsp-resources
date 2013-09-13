@@ -1,19 +1,14 @@
 package org.grails.plugin.gspresources.servlet
 
-import java.io.IOException;
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.Method
 import java.lang.reflect.Proxy
 import java.security.Principal
-import java.util.Collection;
-import java.util.Enumeration;
 
 import javax.servlet.RequestDispatcher
 import javax.servlet.ServletContext
-import javax.servlet.ServletException;
+import javax.servlet.ServletException
 import javax.servlet.ServletInputStream
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie
 import javax.servlet.http.HttpServletRequest
 import javax.servlet.http.HttpServletResponse
@@ -29,17 +24,17 @@ import org.apache.commons.collections.iterators.IteratorEnumeration
  * <p>
  * It conforms to servlet 2.5, so must be compiled using this version. However,
  * it can then be deployed in either a servlet 2.5 or 3.0 container.
- * 
+ *
  * @author Francis McKenzie
  */
-public class BackgroundRequest implements HttpServletRequest {
-    
+class BackgroundRequest implements HttpServletRequest {
+
     /**
      * Instantiate class - dynamically adds any required servlet 3.0
      * methods while still allowing class to be loaded in a servlet 2.5
      * container.
      * <p>
-     * 
+     *
      * @param requestURI The URI of the request
      * @param servletContext The servlet context of the request
      * @param requestArgs Optional properties to set on request using methods of same name, including:
@@ -49,7 +44,7 @@ public class BackgroundRequest implements HttpServletRequest {
      * @param params A map of params to add to the request
      * @return A 'faked' request
      */
-    public static HttpServletRequest createInstance(
+    static HttpServletRequest createInstance(
         Object requestURI,
         Object servletContext,
         Map requestArgs = null)
@@ -57,7 +52,7 @@ public class BackgroundRequest implements HttpServletRequest {
         BackgroundRequest request = new BackgroundRequest(requestURI, servletContext, requestArgs)
         return BackgroundRequest.createProxyInstance(request)
     }
-    
+
     protected static HttpServletRequest createProxyInstance(final BackgroundRequest request) {
         return (HttpServletRequest) Proxy.newProxyInstance(HttpServletRequest.classLoader, [HttpServletRequest] as Class[], new InvocationHandler() {
             Object invoke(proxy, Method method, Object[] args) {
@@ -75,13 +70,13 @@ public class BackgroundRequest implements HttpServletRequest {
                 } else if (methodName == 'getPart') {
                     throw new UnsupportedOperationException("You cannot get get part in non-request rendering operations")
                 }
-                
+
                 // Other methods
                 return request.invokeMethod(methodName, args)
             }
         })
     }
-    
+
     Map<String,Object> attributeMap
     String characterEncoding
     String content
@@ -112,7 +107,7 @@ public class BackgroundRequest implements HttpServletRequest {
     String servletPath
     HttpSession session
     Principal userPrincipal
-    
+
     protected BackgroundRequest(Object requestURI, Object servletContext, Map requestArgs) {
         attributeMap = BackgroundUtils.createAttributeMap(requestArgs?.attributes)
         characterEncoding = requestArgs?.characterEncoding ?: 'UTF-8'
@@ -146,40 +141,40 @@ public class BackgroundRequest implements HttpServletRequest {
         session = requestArgs?.session in HttpSession ? requestArgs.session : null
         userPrincipal = requestArgs?.userPrincipal in Principal ? requestArgs.userPrincipal : null
     }
-    
+
     boolean isAsyncStarted() { false }
-    
+
     boolean isAsyncSupported() { false }
-    
+
     String getAuthType() { '' }
-    
+
     int getContentLength() { content ? content.length() : 0 }
-    
+
     String getContextPath() { servletContext?.contextPath ?: '' }
-     
+
     ServletInputStream getInputStream() {
         final InputStream input = new ByteArrayInputStream((content?:'').getBytes(contentType))
         return new ServletInputStream() {
             int read() { input.read() }
         }
     }
-    
+
     Enumeration<Locale> getLocales() { new IteratorEnumeration(Locale.getAvailableLocales().iterator()) }
-    
+
     BufferedReader getReader() { new BufferedReader(new StringReader(content?:'')) }
-    
+
     boolean isRequestedSessionIdValid() { true }
-    
+
     boolean isRequestedSessionIdFromCookie() { false }
 
     boolean isRequestedSessionIdFromURL() { true }
 
     boolean isRequestedSessionIdFromUrl() { true }
-    
+
     StringBuffer getRequestURL() { new StringBuffer(requestURI?:'') }
-    
+
     boolean isSecure() { false }
-    
+
     long getDateHeader(String name) {
         if (! (headerMap?.get(name)) ) return -1
         try { Long.valueOf(headerMap.get(name)[0]) }
@@ -204,8 +199,8 @@ public class BackgroundRequest implements HttpServletRequest {
     boolean isUserInRole(String role) { false }
 
     String getRealPath(String path) { path }
-    
-    public HttpSession getSession(boolean create) {
+
+    HttpSession getSession(boolean create) {
         session || !create || !servletContext ? session : (session = BackgroundSession.createInstance(servletContext))
     }
 
@@ -225,10 +220,10 @@ public class BackgroundRequest implements HttpServletRequest {
 
     RequestDispatcher getRequestDispatcher(String path) { servletContext?.getRequestDispatcher(path) }
 
-    public boolean authenticate(HttpServletResponse response)
+    boolean authenticate(HttpServletResponse response)
             throws IOException, ServletException { false }
 
-    public void login(String username, String password) throws ServletException { /** No-op **/ }
+    void login(String username, String password) throws ServletException { /** No-op **/ }
 
-    public void logout() throws ServletException { /** No-op **/ }
+    void logout() throws ServletException { /** No-op **/ }
 }
