@@ -5,11 +5,6 @@ import org.grails.plugin.gspresources.GspResourceProcessor
 class GspResourcesGrailsPlugin {
     def version = "0.4.2"
     def grailsVersion = "2.0.0 > *"
-    def dependsOn = [
-        'resources': '1.1.5 > *',
-        'servlets': '2.0.0 > *',
-        'groovyPages': '2.0.0 > *'
-    ]
     def pluginExcludes = [
             'src/groovy/**/test/*',
             'grails-app/views/**/*',
