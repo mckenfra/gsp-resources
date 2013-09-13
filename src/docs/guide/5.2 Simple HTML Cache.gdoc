@@ -45,12 +45,12 @@ You should now be able to view the cached file at
 @http://localhost:8080/myapp/cache/aboutme.html@
 
 {note}
-You will need to restart your server first, so that the `resources` plugin incorporates
+You will need to restart your server first, so that the @resources@ plugin incorporates
 the config change setting made in Step #2. Unfortunately, the current version of
-`resources` (v1.2) cannot hotload changes to this setting.
+@resources@ (v1.2) cannot hotload changes to this setting.
 
 Note, this server restart is only required once - i.e. when first adding the new
-'/cache/*' adhoc pattern to the resources config. From then on, the resources plugin will
-automatically intercept URLs of the form @myapp/cache@ and map them to the actual
+@/cache/*@ adhoc pattern to the resources config. From then on, the @resources@ plugin
+will automatically intercept URLs of the form @myapp/cache@ and map them to the actual
 URL of the requested resource.
 {note} 
