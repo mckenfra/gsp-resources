@@ -1,14 +1,14 @@
 package org.grails.plugin.gspresources
 
-import javax.servlet.ServletContext;
+import javax.servlet.ServletContext
 
 import org.apache.commons.logging.LogFactory
 import org.codehaus.groovy.grails.web.pages.discovery.GrailsConventionGroovyPageLocator
-import org.codehaus.groovy.grails.web.pages.discovery.GroovyPageStaticResourceLocator
 import org.codehaus.groovy.grails.web.pages.discovery.GroovyPageScriptSource
-import org.springframework.core.io.FileSystemResource;
+import org.codehaus.groovy.grails.web.pages.discovery.GroovyPageStaticResourceLocator
+import org.springframework.core.io.FileSystemResource
 import org.springframework.core.io.Resource
-import org.springframework.web.context.ServletContextAware;
+import org.springframework.web.context.ServletContextAware
 
 /**
  * For finding GSP files, which can be views, templates or resources.
@@ -16,8 +16,8 @@ import org.springframework.web.context.ServletContextAware;
  * @author Francis McKenzie
  */
 class GspResourceLocator implements ServletContextAware {
-    def log = LogFactory.getLog(this.class)
-    
+    def log = LogFactory.getLog(getClass())
+
     static GSP_FILE_EXTENSIONS = ['.gsp']
 
     /**
@@ -32,11 +32,11 @@ class GspResourceLocator implements ServletContextAware {
      * Injected - for getting the real path of a resource
      */
     ServletContext servletContext
-    
+
     /**
      * Checks for <code>.gsp</code> suffix in filename or uri
      */
-    public boolean isGsp(fileOrUri) {
+    boolean isGsp(fileOrUri) {
         def name = fileOrUri?.toString()?.toLowerCase()
         return name && GSP_FILE_EXTENSIONS.any { name.endsWith(it) }
     }
@@ -44,7 +44,7 @@ class GspResourceLocator implements ServletContextAware {
     /**
      * Removes <code>.gsp</code> suffix from filename
      */
-    public String generateCompiledFilenameFromOriginal(filename) {
+    String generateCompiledFilenameFromOriginal(filename) {
         String result = filename?.toString()
         if (result) {
             GSP_FILE_EXTENSIONS.each { ext ->
@@ -53,7 +53,7 @@ class GspResourceLocator implements ServletContextAware {
         }
         return result
     }
-    
+
     /**
      * Finds a GSP file, using grailsResourceLocator and groovyPageLocator.
      * <p>
@@ -69,11 +69,11 @@ class GspResourceLocator implements ServletContextAware {
      * </ul>
      * <p>
      * If no GSP found, an empty map is returned.
-     * 
+     *
      * @param uri The external URI of the GSP
-     * @return Map of results (empty if no GSP found) as described above 
+     * @return Map of results (empty if no GSP found) as described above
      */
-    public Map findGsp(uri) {
+    Map findGsp(uri) {
         Map result = [:]
         if (uri) {
             result = findGspResource(uri)
@@ -82,7 +82,7 @@ class GspResourceLocator implements ServletContextAware {
         }
         return result
     }
-    
+
     /**
      * Finds a GSP file resource, using grailsResourceLocator.
      * <p>
@@ -96,15 +96,15 @@ class GspResourceLocator implements ServletContextAware {
      * </ul>
      * <p>
      * If no GSP found, an empty map is returned.
-     * 
+     *
      * @param uri The external URI of the GSP
-     * @return Map of results (empty if no GSP found) as described above 
+     * @return Map of results (empty if no GSP found) as described above
      **/
-    public Map findGspResource(uri) {
+    Map findGspResource(uri) {
         if (log.isDebugEnabled()) {
             log.debug "FINDING: GSP Resource ${uri}....."
         }
-        Map result;
+        Map result
         try {
             Resource resource = grailsResourceLocator.findResourceForURI(uri)
             if (resource) {
@@ -123,7 +123,7 @@ class GspResourceLocator implements ServletContextAware {
         }
         return result
     }
-    
+
     /**
      * Finds a GSP view file, using groovyPageLocator.
      * <p>
@@ -137,15 +137,15 @@ class GspResourceLocator implements ServletContextAware {
      * </ul>
      * <p>
      * If no GSP found, an empty map is returned.
-     * 
+     *
      * @param uri The external URI of the GSP
-     * @return Map of results (empty if no GSP found) as described above 
+     * @return Map of results (empty if no GSP found) as described above
      **/
-    public Map findGspView(uri) {
+    Map findGspView(uri) {
         if (log.isDebugEnabled()) {
             log.debug "FINDING: GSP View ${uri}....."
         }
-        Map result;
+        Map result
         try {
             GroovyPageScriptSource resource = groovyPageLocator.findViewByPath(uri.toString())
             if (resource) {
@@ -178,15 +178,15 @@ class GspResourceLocator implements ServletContextAware {
      * </ul>
      * <p>
      * If no GSP found, an empty map is returned.
-     * 
+     *
      * @param uri The external URI of the GSP
-     * @return Map of results (empty if no GSP found) as described above 
+     * @return Map of results (empty if no GSP found) as described above
      **/
-    public Map findGspTemplate(uri) {
+    Map findGspTemplate(uri) {
         if (log.isDebugEnabled()) {
             log.debug "FINDING: GSP Template ${uri}....."
         }
-        Map result;
+        Map result
         try {
             GroovyPageScriptSource resource = groovyPageLocator.findTemplateByPath(uri.toString())
             if (resource) {
