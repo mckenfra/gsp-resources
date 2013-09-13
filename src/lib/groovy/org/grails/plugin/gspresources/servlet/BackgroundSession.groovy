@@ -48,19 +48,19 @@ class BackgroundSession implements HttpSession {
 
     int getMaxInactiveInterval() { 0 }
 
-    void invalidate() { attributeMap.clear() }
+    void invalidate() { attributeMap?.clear() }
 
     boolean isNew() { false }
 
     void setMaxInactiveInterval(int arg0) { /** No-op **/ }
 
-    Enumeration<String> getAttributeNames() { new IteratorEnumeration((attributeMap?.keySet()?:[]).iterator()) }
+    Enumeration<String> getAttributeNames() { new IteratorEnumeration((attributeMap?.keySet()?:Collections.emptySet()).iterator()) }
 
     Object getAttribute(String name) { attributeMap?.get(name) }
 
     void setAttribute(String name, Object value) { attributeMap?.put(name, value) }
 
-    void removeAttribute(String name) { attributeMap.remove(name) }
+    void removeAttribute(String name) { attributeMap?.remove(name) }
 
     // DEPRECATED METHODS
 
@@ -68,11 +68,11 @@ class BackgroundSession implements HttpSession {
         throw new UnsupportedOperationException("You cannot get session context in non-request rendering operations")
     }
 
-    String[] getValueNames() { (attributeMap?.keySet()?:[]) as String[] }
+    String[] getValueNames() { (attributeMap?.keySet()?:Collections.emptySet()) as String[] }
 
     Object getValue(String name) { attributeMap?.get(name) }
 
     void putValue(String name, Object value) { attributeMap?.put(name, value) }
 
-    void removeValue(String name) { attributeMap.remove(name) }
+    void removeValue(String name) { attributeMap?.remove(name) }
 }

@@ -55,7 +55,7 @@ class BackgroundResponse implements HttpServletResponse {
         this.writer = writer instanceof PrintWriter ? writer : new PrintWriter(writer)
     }
 
-    void addCookie(Cookie cookie) { cookies.add(cookie) }
+    void addCookie(Cookie cookie) { cookies?.add(cookie) }
 
     void setContentLength(int contentLength) {
         this.contentLength = contentLength
@@ -67,7 +67,7 @@ class BackgroundResponse implements HttpServletResponse {
         setHeader('Content-Type', contentType)
     }
 
-    boolean containsHeader(String name) { return headers.containsKey(name) }
+    boolean containsHeader(String name) { return headerMap?.containsKey(name) }
 
     String encodeURL(String url) { url }
 
@@ -87,17 +87,19 @@ class BackgroundResponse implements HttpServletResponse {
     void sendRedirect(String location) { status = 302 }
 
     void setHeader(String name, String value) {
-        if (!headerMap || !name) return
-        if (value == null) headerMap.remove(name)
-        else headerMap.put(name, [value] as List<String>)
+        Map<String,List<String>> headers = headerMap
+        if (!headers || !name) return
+        if (value == null) headers.remove(name)
+        else headers.put(name, [value] as List<String>)
     }
 
     void addHeader(String name, String value) {
-        if (!headerMap) return
-        List<String> values = headerMap.get(name)
+        Map<String,List<String>> headers = headerMap
+        if (!headers) return
+        List<String> values = headers.get(name)
         if (!values) {
             values = [] as List<String>
-            headerMap.put(name, values)
+            headers.put(name, values)
         }
         values.add(value)
     }
@@ -125,12 +127,15 @@ class BackgroundResponse implements HttpServletResponse {
 
     void reset() {
         status = 0
-        headerMap.clear()
+        headerMap?.clear()
     }
 
-    Collection<String> getHeaders(String name) { headerMap?.get(name) ?: [] }
+    Collection<String> getHeaders(String name) { headerMap?.get(name) ?: Collections.emptyList() }
 
-    Collection<String> getHeaderNames() { headerMap?.keySet() }
+    Collection<String> getHeaderNames() { headerMap?.keySet() ?: Collections.emptySet() }
 
-    String getHeader(String name) { headerMap.get(name) ? headerMap.get(name)[0] : null }
+    String getHeader(String name) {
+        List<String> header = headerMap?.get(name)
+        header ? header[0] : null
+    }
 }

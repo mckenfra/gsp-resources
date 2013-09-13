@@ -25,8 +25,8 @@ class BackgroundUtils {
         return result as Cookie[]
     }
 
-    static Map<String,String[]> createAttributeMap(withMap) {
-        Map<String,String[]> result = [:] as Map<String,String[]>
+    static Map<String,Object> createAttributeMap(withMap) {
+        Map<String,Object> result = [:] as Map<String,Object>
         if (withMap in Map) {
             withMap.each { result.put(it.key.toString(), it.value) }
         }
@@ -34,7 +34,7 @@ class BackgroundUtils {
     }
 
     static Map<String,String[]> createParameterMap(withMap) {
-        Map<String,String[]> result = [:]
+        Map<String,String[]> result = [:] as Map<String,String[]>
         if (withMap in Map) {
             withMap.each { key, value ->
                 def values

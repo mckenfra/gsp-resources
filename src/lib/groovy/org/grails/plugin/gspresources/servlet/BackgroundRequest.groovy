@@ -148,12 +148,12 @@ class BackgroundRequest implements HttpServletRequest {
 
     String getAuthType() { '' }
 
-    int getContentLength() { content ? content.length() : 0 }
+    int getContentLength() { String c = content; return c ? c.length() : 0 }
 
     String getContextPath() { servletContext?.contextPath ?: '' }
 
     ServletInputStream getInputStream() {
-        final InputStream input = new ByteArrayInputStream((content?:'').getBytes(contentType))
+        final InputStream input = new ByteArrayInputStream((content?:'').getBytes(contentType?:'UTF-8'))
         return new ServletInputStream() {
             int read() { input.read() }
         }
@@ -176,23 +176,28 @@ class BackgroundRequest implements HttpServletRequest {
     boolean isSecure() { false }
 
     long getDateHeader(String name) {
-        if (! (headerMap?.get(name)) ) return -1
-        try { Long.valueOf(headerMap.get(name)[0]) }
+        String[] header = headerMap?.get(name)
+        if (!header) return -1
+        try { Long.valueOf(header[0]) }
         catch(e) { throw new IllegalArgumentException(name) }
     }
 
-    String getHeader(String name) { headerMap?.get(name) ? headerMap.get(name)[0] : null }
+    String getHeader(String name) {
+        String[] header = headerMap?.get(name)
+        header ? header[0] : null
+    }
 
     Enumeration<String> getHeaders(String name) {
-        def values = headerMap?.get(name) ?: []
+        def values = headerMap?.get(name) ?: Collections.emptyList()
         new IteratorEnumeration(values.iterator())
     }
 
-    Enumeration<String> getHeaderNames() { new IteratorEnumeration((headerMap?.keySet()?:[]).iterator()) }
+    Enumeration<String> getHeaderNames() { new IteratorEnumeration((headerMap?.keySet()?:Collections.emptySet()).iterator()) }
 
     int getIntHeader(String name) {
-        if (! (headerMap?.get(name)) ) return -1
-        try { Integer.valueOf(headerMap.get(name)[0]) }
+        String[] header = headerMap?.get(name)
+        if (!header) return -1
+        try { Integer.valueOf(header[0]) }
         catch(e) { throw new NumberFormatException(name) }
     }
 
@@ -204,19 +209,22 @@ class BackgroundRequest implements HttpServletRequest {
         session || !create || !servletContext ? session : (session = BackgroundSession.createInstance(servletContext))
     }
 
-    Object getAttribute(String name) { attributeMap ? attributeMap.get(name) : null }
+    Object getAttribute(String name) { attributeMap?.get(name) }
 
-    Enumeration<String> getAttributeNames() { new IteratorEnumeration((attributeMap?.keySet()?:[]).iterator()) }
+    Enumeration<String> getAttributeNames() { new IteratorEnumeration((attributeMap?.keySet()?:Collections.emptySet()).iterator()) }
 
-    void setAttribute(String name, Object o) { attributeMap.put(name, o) }
+    void setAttribute(String name, Object o) { attributeMap?.put(name, o) }
 
     void removeAttribute(String name) { attributeMap?.remove(name) }
 
-    String getParameter(String name) { parameterMap?.get(name) ? parameterMap.get(name)[0] : null }
+    String getParameter(String name) {
+        String[] parameter = parameterMap?.get(name)
+        parameter ? parameter[0] : null
+    }
 
-    Enumeration<String> getParameterNames() { new IteratorEnumeration((parameterMap?.keySet()?:[]).iterator()) }
+    Enumeration<String> getParameterNames() { new IteratorEnumeration((parameterMap?.keySet()?:Collections.emptySet()).iterator()) }
 
-    String[] getParameterValues(String name) { parameterMap ? parameterMap.get(name) : [] as String[] }
+    String[] getParameterValues(String name) { parameterMap?.get(name) }
 
     RequestDispatcher getRequestDispatcher(String path) { servletContext?.getRequestDispatcher(path) }
 
