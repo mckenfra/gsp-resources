@@ -2,7 +2,7 @@
                       "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
 <head>
-    <title>5 Advanced Configuration 0.4.2-SNAPSHOT</title>
+    <title>5 Advanced Configuration 0.4.2</title>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
     <link rel="stylesheet" href="../css/main.css" type="text/css" media="screen, print" title="Style" charset="utf-8"/>
     <link rel="stylesheet" href="../css/pdf.css" type="text/css" media="print" title="PDF" charset="utf-8"/>
@@ -83,7 +83,7 @@ function addJsClass() {
 
                     <p><strong>Authors:</strong> Stefan Kendall, Francis McKenzie</p>
 
-                    <p><strong>Version:</strong> 0.4.2-SNAPSHOT</p>
+                    <p><strong>Version:</strong> 0.4.2</p>
 
                     
                 </div>
@@ -143,8 +143,14 @@ grails.resources.adhoc.patterns = &#91;'/images/&#42;', '/css/&#42;', '/js/&#42;
     &#125;
 &#125;</pre></div><p class="paragraph"/><h4>5. Check results</h4><p class="paragraph"/>You should now be able to view the cached file at
 <code>http://localhost:8080/myapp/cache/aboutme.html</code><p class="paragraph"/><blockquote class="note">
-Don't forget to restart your server first!
+You will need to restart your server first, so that the `resources` plugin incorporates
+the config change setting made in Step #2. Unfortunately, the current version of
+`resources` (v1.2) cannot hotload changes to this setting.<p class="paragraph"/>Note, this server restart is only required once - i.e. when first adding the new
+'/cache/*' adhoc pattern to the resources config. From then on, the resources plugin will
+automatically intercept URLs of the form <code>myapp/cache</code> and map them to the actual
+URL of the requested resource.
 </blockquote> 
+
 
 
                 <div style="clear:both;margin-top:15px;"></div>
