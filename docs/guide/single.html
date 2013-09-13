@@ -175,11 +175,11 @@ grails.resources.adhoc.patterns = &#91;'/images/&#42;', '/css/&#42;', '/js/&#42;
     &#125;
 &#125;</pre></div><p class="paragraph"/><h4>5. Check results</h4><p class="paragraph"/>You should now be able to view the cached file at
 <code>http://localhost:8080/myapp/cache/aboutme.html</code><p class="paragraph"/><blockquote class="note">
-You will need to restart your server first, so that the `resources` plugin incorporates
+You will need to restart your server first, so that the <code>resources</code> plugin incorporates
 the config change setting made in Step #2. Unfortunately, the current version of
-`resources` (v1.2) cannot hotload changes to this setting.<p class="paragraph"/>Note, this server restart is only required once - i.e. when first adding the new
-'/cache/*' adhoc pattern to the resources config. From then on, the resources plugin will
-automatically intercept URLs of the form <code>myapp/cache</code> and map them to the actual
+<code>resources</code> (v1.2) cannot hotload changes to this setting.<p class="paragraph"/>Note, this server restart is only required once - i.e. when first adding the new
+<code>/cache/*</code> adhoc pattern to the resources config. From then on, the <code>resources</code> plugin
+will automatically intercept URLs of the form <code>myapp/cache</code> and map them to the actual
 URL of the requested resource.
 </blockquote> 
 
