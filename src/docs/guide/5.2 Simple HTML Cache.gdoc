@@ -19,7 +19,15 @@ Make the following change to @grails-app/conf/Config.groovy@
 grails.resources.adhoc.patterns = ['/images/*', '/css/*', '/js/*', '/plugins/*', '/cache/*']
 {code}
 
-h4. 3. Create GSP to cache controller output
+h4. 3. Configure resources plugin to delay processing
+
+Make the following change to @grails-app/conf/Config.groovy@
+
+{code}
+grails.resources.processing.startup = "delayed"
+{code}
+
+h4. 4. Create GSP to cache controller output
 
 Add the below content to @web-app/cache/aboutme.html.gsp@
 
@@ -27,7 +35,7 @@ Add the below content to @web-app/cache/aboutme.html.gsp@
 <g:include controller="about" action="me"/>
 {code}
 
-h4. 4. Add new GSP to @resources@ plugin configuration
+h4. 5. Add new GSP to @resources@ plugin configuration
 
 Make the following change to @grails-app/conf/ApplicationResources.groovy@
 
@@ -39,7 +47,7 @@ modules = {
 }
 {code}
 
-h4. 5. Check results
+h4. 6. Check results
 
 You should now be able to view the cached file at
 @http://localhost:8080/myapp/cache/aboutme.html@
