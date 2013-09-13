@@ -26,8 +26,8 @@ import org.grails.plugin.resource.mapper.MapperPhase
  * @author Francis McKenzie
  */
 class GspResourceMapper {
-    def log = LogFactory.getLog(this.class)
-    
+    def log = LogFactory.getLog(getClass())
+
     def phase = MapperPhase.GENERATION
 
     def priority = -1
@@ -43,11 +43,11 @@ class GspResourceMapper {
      * Injected - for preparing the GSP resource
      */
     GspResourceProcessor grailsResourceProcessor
-    
+
     /**
      * Ensures the specified resource is a GSP, then creates the delegating
      * resource to render the GSP.
-     * 
+     *
      * @param resource The resource to map
      * @param config The resources plugin config
      */
@@ -55,7 +55,7 @@ class GspResourceMapper {
         if (log.isDebugEnabled()) {
             log.debug "Checking if is a GSP: ${resource.sourceUrl}"
         }
-        
+
         // Check if GSP
         Map gsp = gspResourceLocator.findGsp(resource.sourceUrl)
         if (gsp?.resource) {

@@ -1,5 +1,7 @@
-includeTargets << new File("${gspResourcesPluginDir}/scripts/_GspResources.groovy")
+includeTargets << new File(gspResourcesPluginDir, "scripts/_GspResources.groovy")
 
-target(default: "Builds library") {
+target(buildGspResourcesLib: "Builds library") {
     build()
 }
+
+setDefaultTarget 'buildGspResourcesLib'

@@ -1,5 +1,7 @@
-includeTargets << new File("${gspResourcesPluginDir}/scripts/_GspResources.groovy")
+includeTargets << new File(gspResourcesPluginDir, "scripts/_GspResources.groovy")
 
-target(default: "Cleans library") {
+target(cleanGspResourcesLib: "Cleans library") {
     clean()
 }
+
+setDefaultTarget 'cleanGspResourcesLib'

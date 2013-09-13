@@ -4,12 +4,12 @@ import javax.servlet.http.Cookie
 
 /**
  * Utility methods for converting values
- * 
+ *
  * @author Francis McKenzie
  */
-public class BackgroundUtils {
-    
-    static Cookie[] createCookies(Object withCookies) {
+class BackgroundUtils {
+
+    static Cookie[] createCookies(withCookies) {
         def result
         if (withCookies in Cookie[]) {
             result = withCookies
@@ -24,26 +24,25 @@ public class BackgroundUtils {
         }
         return result as Cookie[]
     }
-    
-    static Map<String,String[]> createAttributeMap(Object withMap) {
+
+    static Map<String,String[]> createAttributeMap(withMap) {
         Map<String,String[]> result = [:] as Map<String,String[]>
         if (withMap in Map) {
             withMap.each { result.put(it.key.toString(), it.value) }
         }
         return result
     }
-    
-    static Map<String,String[]> createParameterMap(Object withMap) {
-        Map<String,String[]> result = [:] as Map<String,String[]>
+
+    static Map<String,String[]> createParameterMap(withMap) {
+        Map<String,String[]> result = [:]
         if (withMap in Map) {
-            withMap.each {
-                def value = it.value
+            withMap.each { key, value ->
                 def values
                 if (value in Collection || value in Object[])
                     values = value
                 else
                     values = value ? [value] : []
-                result.put(it.key.toString(), values as String[])
+                result.put(key.toString(), values as String[])
             }
         }
         return result

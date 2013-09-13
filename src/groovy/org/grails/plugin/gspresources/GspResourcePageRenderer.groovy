@@ -4,19 +4,18 @@ import javax.servlet.ServletContext
 import javax.servlet.http.Cookie
 
 import org.apache.commons.logging.LogFactory
-import org.codehaus.groovy.grails.commons.GrailsApplication;
-import org.codehaus.groovy.grails.web.pages.discovery.GrailsConventionGroovyPageLocator
-import org.codehaus.groovy.grails.web.pages.discovery.GroovyPageScriptSource;
-import org.codehaus.groovy.grails.web.pages.discovery.GroovyPageStaticResourceLocator;
 import org.codehaus.groovy.grails.web.pages.FastStringWriter
 import org.codehaus.groovy.grails.web.pages.GroovyPagesTemplateEngine
-import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes;
+import org.codehaus.groovy.grails.web.pages.discovery.GrailsConventionGroovyPageLocator
+import org.codehaus.groovy.grails.web.pages.discovery.GroovyPageScriptSource
+import org.codehaus.groovy.grails.web.pages.discovery.GroovyPageStaticResourceLocator
+import org.codehaus.groovy.grails.web.servlet.GrailsApplicationAttributes
 import org.codehaus.groovy.grails.web.servlet.mvc.GrailsWebRequest
 import org.grails.plugin.gspresources.servlet.BackgroundRequest
 import org.grails.plugin.gspresources.servlet.BackgroundResponse
 import org.springframework.context.ApplicationContext
 import org.springframework.context.ApplicationContextAware
-import org.springframework.core.io.Resource;
+import org.springframework.core.io.Resource
 import org.springframework.web.context.ServletContextAware
 import org.springframework.web.context.request.RequestContextHolder
 
@@ -24,30 +23,30 @@ import org.springframework.web.context.request.RequestContextHolder
  * Similar to grails.gsp.PageRender, which is included in
  * grails 2.0.x. However, it includes a few enhancements:
  * <ol type="1">
- * 
+ *
  * <li>The original PageRenderer is restricted to rendering Views. I.e.
  * the GSPs must exist in the views directory. This class allows
  * specifying a GSP as a 'resource' - i.e. it can be located outside
  * the views directory.<br/></li>
- * 
+ *
  * <li>The page context is correctly set in the mock request object. With the
  * original grails PageRenderer in Grails 2.0.1, this is currently missing.
  * Therefore any calls to resource(dir:'/') in a GSP may not render
  * the path correctly.<br/></li>
- * 
+ *
  * <li>Other request attributes (e.g. session, remoteHost, cookies) that
  * are generally required for GSP rendering are also supported.</li>
- * 
+ *
  * </ol>
  *
  * @author Graeme Rocher / Francis McKenzie
  */
 class GspResourcePageRenderer implements ApplicationContextAware, ServletContextAware {
-    def log = LogFactory.getLog(this.class)
-    
+    def log = LogFactory.getLog(getClass())
+
     // Passed in constructor
     protected GroovyPagesTemplateEngine templateEngine
-    
+
     /**
      * Injected - for finding a view or template
      */
@@ -121,7 +120,7 @@ class GspResourcePageRenderer implements ApplicationContextAware, ServletContext
     /**
      * Internal method - renders a page and returns the contents. The public
      * methods call this method.
-     * 
+     *
      * @param args.view The URI of the view to render. Must be an absolute view path since the controller name is unknown.
      * @param args.template The URI of the template to render. Must be an absolute template path since the controller name is unknown.
      * @param args.resource The URI of the resource to render. Must be an absolute template path since the controller name is unknown.
@@ -155,7 +154,7 @@ class GspResourcePageRenderer implements ApplicationContextAware, ServletContext
             if (! servletContext.getAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT)) {
                 servletContext.setAttribute(GrailsApplicationAttributes.APPLICATION_CONTEXT, applicationContext)
             }
-            
+
             // Create the HTTP request/response
             List<Cookie> cookies = (args.cookies?:[]) as List<Cookie>
             def request = BackgroundRequest.createInstance(source.URI, servletContext, args)
@@ -176,7 +175,7 @@ class GspResourcePageRenderer implements ApplicationContextAware, ServletContext
             if (args.action) {
                 webRequest.setActionName(args.action)
             }
-            
+
             // Process the grails web request
             RequestContextHolder.setRequestAttributes(webRequest)
             def template = templateEngine.createTemplate(source)
@@ -186,5 +185,5 @@ class GspResourcePageRenderer implements ApplicationContextAware, ServletContext
         } finally {
             RequestContextHolder.setRequestAttributes(oldRequestAttributes)
         }
-    }    
+    }
 }
