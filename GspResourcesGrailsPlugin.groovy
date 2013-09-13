@@ -15,13 +15,17 @@ class GspResourcesGrailsPlugin {
             'src/docs/**'
     ]
 
-    def author = "Stefan Kendall, Francis McKenzie"
-    def authorEmail = "stefankendall@gmail.com, francis.mckenzie@gmail.com"
     def title = "GSP Resources"
     def description = 'Use resources plugin to serve dynamically-built CSS and JS as static files instead of dynamic (non-cacheable) GSPs.'
 
     def documentation = "http://mckenfra.github.com/gsp-resources/docs/guide/single.html"
 
+    def license = "APACHE"
+    def developers = [
+        [name: "Stefan Kendall", email: "stefankendall@gmail.com"],
+        [name: "Francis McKenzie", email: "francis.mckenzie@gmail.com"]
+    ]
+    def issueManagement = [system: "GITHUB", url: "https://github.com/mckenfra/gsp-resources/issues"]
     def scm = [url: "https://github.com/mckenfra/gsp-resources"]
 
     // Inject the renderer, gsp locator, and override the resources plugin processor
