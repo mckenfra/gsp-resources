@@ -1,5 +1,6 @@
 package org.grails.plugin.gspresources
 
+import org.apache.commons.lang.SystemUtils
 import org.apache.commons.logging.LogFactory
 import org.grails.plugin.resource.ResourceMeta
 import org.grails.plugin.resource.ResourceModule
@@ -111,7 +112,7 @@ class GspResourceMeta extends ResourceMeta {
             // Hack to fix bug in Windows Java
             // See http://stackoverflow.com/questions/991489/i-cant-delete-a-file-in-java
             // Unless we do the following, Windows will not let us rename our newly-created file
-            System.gc()
+            if (SystemUtils.IS_OS_WINDOWS) System.gc()
 
         // This GspResourceMeta has not been set up properly
         } else {
