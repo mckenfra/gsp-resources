@@ -108,6 +108,11 @@ class GspResourceMeta extends ResourceMeta {
             // of the bundle, after all non-GSP-type resources.
             if (originalModule) module = originalModule
 
+            // Hack to fix bug in Windows Java
+            // See http://stackoverflow.com/questions/991489/i-cant-delete-a-file-in-java
+            // Unless we do the following, Windows will not let us rename our newly-created file
+            System.gc()
+
         // This GspResourceMeta has not been set up properly
         } else {
             throw new IllegalArgumentException("Some required variables missing for GSP ${gsp?.file}")

@@ -73,7 +73,7 @@ import org.springframework.core.io.Resource
  * @author Francis McKenzie
  */
 class GspResourceProcessor extends ResourceProcessor {
-    def log = LogFactory.getLog(getClass())
+    def glog = LogFactory.getLog(getClass())
 
     /**
      * Injected - for finding the underlying GSP file
@@ -120,15 +120,15 @@ class GspResourceProcessor extends ResourceProcessor {
     void reloadAll() {
         if (!blocked || firstReloadAllDone) {
             if (!firstReloadAllDone) {
-                if (log.isDebugEnabled()) {
-                    log.debug "Begin initial resources processing"
+                if (glog.debugEnabled) {
+                    glog.debug "Begin initial resources processing"
                 }
             }
             firstReloadAllDone = true
             super.reloadAll()
         } else {
-            if (log.isDebugEnabled()) {
-                log.debug "Block resources processing"
+            if (glog.debugEnabled) {
+                glog.debug "Block resources processing"
             }
         }
     }
@@ -141,7 +141,7 @@ class GspResourceProcessor extends ResourceProcessor {
     boolean isStartOnPluginLoad() {
         boolean startNow = ! (firstReloadAllDone || startup == false || /(?i)false|delayed/ =~ startup)
         if (! firstReloadAllDone) {
-            log.info "${startNow ? 'Start' : 'Delay'} resources processing at plugin load"
+            glog.info "${startNow ? 'Start' : 'Delay'} resources processing at plugin load"
         }
         return startNow
     }
@@ -158,7 +158,7 @@ class GspResourceProcessor extends ResourceProcessor {
     boolean isStartOnPluginBootstrap() {
         boolean startNow = ! (firstReloadAllDone || startup == false || /(?i)false/ =~ startup)
         if (! firstReloadAllDone) {
-            log.info "${startNow ? 'Start' : 'Delay'} resources processing at plugin bootstrap"
+            glog.info "${startNow ? 'Start' : 'Delay'} resources processing at plugin bootstrap"
         }
         return startNow
     }
@@ -172,7 +172,7 @@ class GspResourceProcessor extends ResourceProcessor {
            unblock()
            reloadAll()
         } else {
-            log.warn "Tried to start resources processing, but it has already been run!"
+            glog.warn "Tried to start resources processing, but it has already been run!"
         }
     }
 
@@ -204,8 +204,8 @@ class GspResourceProcessor extends ResourceProcessor {
         if (!orderedNames) return batch
 
         // Log
-        if (log.isDebugEnabled()) {
-            log.debug "Reordering resources according to module dependency ordering: ${orderedNames}"
+        if (glog.debugEnabled) {
+            glog.debug "Reordering resources according to module dependency ordering: ${orderedNames}"
         }
 
         // Create new resources set with correct ordering
@@ -298,10 +298,10 @@ class GspResourceProcessor extends ResourceProcessor {
         // THE GSP-SYNTHETICS ARE PROCESSED BEFORE THE
         // BUNDLING-SYNTHETICS
         // ********************************************************
-        if (log.debugEnabled) {
-            log.debug "Preparing resource batch:"
+        if (glog.debugEnabled) {
+            glog.debug "Preparing resource batch:"
             batch.each { r ->
-                log.debug "Batch includes resource: ${r.sourceUrl}"
+                glog.debug "Batch includes resource: ${r.sourceUrl}"
             }
         }
 
@@ -323,8 +323,8 @@ class GspResourceProcessor extends ResourceProcessor {
         }
 
         // Synthetic resources are only known after processing declared resources
-        if (log.debugEnabled) {
-            log.debug "Preparing synthetic resources"
+        if (glog.debugEnabled) {
+            glog.debug "Preparing synthetic resources"
         }
 
         // ********************************************************
@@ -334,8 +334,8 @@ class GspResourceProcessor extends ResourceProcessor {
 
         // The rest is the same
         for (r in affectedSynthetics) {
-            if (log.debugEnabled) {
-                log.debug "Preparing synthetic resource: ${r.sourceUrl}"
+            if (glog.debugEnabled) {
+                glog.debug "Preparing synthetic resource: ${r.sourceUrl}"
             }
 
             r.reset()
@@ -394,8 +394,8 @@ class GspResourceProcessor extends ResourceProcessor {
 
         // Process those bundle synthetics
         for (r in bundlingSyntheticsNeedingProcessing) {
-            if (log.debugEnabled) {
-                log.debug "Preparing synthetic resource, because GSP was modified: ${r.sourceUrl}"
+            if (glog.debugEnabled) {
+                glog.debug "Preparing synthetic resource, because GSP was modified: ${r.sourceUrl}"
             }
 
             r.reset()
@@ -495,8 +495,8 @@ class GspResourceProcessor extends ResourceProcessor {
             } else {
                 String uri = ResourceProcessor.removeQueryParams(extractURI(request, true))
                 isGspResource = isGeneratedFromGsp(uri)
-                if (log.debugEnabled) {
-                    log.debug "${isGspResource ? 'GSP' : 'NON-GSP'}: ${request.requestURI}"
+                if (glog.debugEnabled) {
+                    glog.debug "${isGspResource ? 'GSP' : 'NON-GSP'}: ${request.requestURI}"
                 }
                 request.setAttribute('resources.debug.gsp', isGspResource)
             }
@@ -600,8 +600,8 @@ class GspResourceProcessor extends ResourceProcessor {
     protected void serveResource(ServletRequest request, ServletResponse response, File file,
         String contentType = null, Integer contentLength = null, Long lastModified = null) {
         if (file?.exists()) {
-            if (log.debugEnabled) {
-                log.debug "Serving resource ${request.requestURI}"
+            if (glog.debugEnabled) {
+                glog.debug "Serving resource ${request.requestURI}"
             }
             def data = file.newInputStream()
             try {
@@ -671,14 +671,14 @@ class GspResourceProcessor extends ResourceProcessor {
             def bundleMapper = resourceMappers.find { it.name == 'bundle' }
             bundleMapper?.invokeIfNotExcluded(rendered)
 
-            if (log.debugEnabled) {
-                log.debug "Created synthetic GSP resource: ${resource.actualUrl}"
+            if (glog.debugEnabled) {
+                glog.debug "Created synthetic GSP resource: ${resource.actualUrl}"
             }
 
         // Synthetic resource already created
         } else {
-            if (log.debugEnabled) {
-                log.debug "Synthetic GSP resource already exists: ${resource.actualUrl}"
+            if (glog.debugEnabled) {
+                glog.debug "Synthetic GSP resource already exists: ${resource.actualUrl}"
             }
         }
 

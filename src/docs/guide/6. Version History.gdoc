@@ -1,5 +1,6 @@
 {table}
  *Version* | *Date* | *Description*
+ 0.4.4 | Sep 28, 2013 | - Bugfix: incompatible with resources 1.2.1\\- Bugfix: CSS files broken on Windows due to Java file bug
  0.4.3 | Sep 18, 2013 | Bugfix: ensure plugin loads after @resources@ plugin
  0.4.2 | Sep 13, 2013 | *Enhancements/Fixes*:\\- Allow rendered GSPs in bundles\\- Fix broken dependencies due to grails 2.3\\- Fix compatibility with Servlet 2.5 and 3.0
  0.4.1 | Jul 6, 2012 | Bugfix: preserve @type@ from @Resources.groovy@ configuration
