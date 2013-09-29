@@ -3,7 +3,7 @@ import org.grails.plugin.gspresources.GspResourcePageRenderer
 import org.grails.plugin.gspresources.GspResourceProcessor
 
 class GspResourcesGrailsPlugin {
-    def version = "0.4.4-SNAPSHOT"
+    def version = "0.4.4"
     def grailsVersion = "2.0.0 > *"
     def loadAfter = ['resources', 'servlets', 'groovyPages']
     def pluginExcludes = [
