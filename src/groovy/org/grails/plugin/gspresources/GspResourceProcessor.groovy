@@ -646,11 +646,11 @@ class GspResourceProcessor extends ResourceProcessor {
         if (resource.tagAttributes == null) resource.tagAttributes = [:]
         resource.tagAttributes.type = resource.tagAttributes.type ?: getResourceTypeFromUri(resource.actualUrl)
 
-        // Now create the synthetic resource that this resource is going to delegate to
-        def rendered = findSyntheticResourceById(resource.actualUrl)
-        if (! rendered) {
+//        // Now create the synthetic resource that this resource is going to delegate to
+//        def rendered = findSyntheticResourceById(resource.actualUrl)
+//        if (! rendered) {
             // Creates a new resource and empty file
-            rendered = newSyntheticResource(resource.actualUrl, GspResourceMeta)
+            def rendered = newSyntheticResource(resource.actualUrl, GspResourceMeta)
             rendered.id = resource.actualUrl
             rendered.gsp = gsp
             rendered.contentType = resource.contentType
@@ -675,12 +675,12 @@ class GspResourceProcessor extends ResourceProcessor {
                 glog.debug "Created synthetic GSP resource: ${resource.actualUrl}"
             }
 
-        // Synthetic resource already created
-        } else {
-            if (glog.debugEnabled) {
-                glog.debug "Synthetic GSP resource already exists: ${resource.actualUrl}"
-            }
-        }
+//        // Synthetic resource already created
+//        } else {
+//            if (glog.debugEnabled) {
+//                glog.debug "Synthetic GSP resource already exists: ${resource.actualUrl}"
+//            }
+//        }
 
         // When the rendered synthetic resource is eventually processed, it
         // changes its module to be that of the original GSP resource - this
